@@ -462,10 +462,10 @@ module Bosh::Stemcell
                 :bosh_softlayer_agent_settings,
                 :bosh_config_root_ssh_login,
                 :bosh_clean_ssh,
-                :image_create,
-                :image_install_grub,
                 :system_rsyslog_bluemix,
                 :bosh_audit_bluemix,
+                :image_create,
+                :image_install_grub,
                 :bosh_package_list
               ]
             )
