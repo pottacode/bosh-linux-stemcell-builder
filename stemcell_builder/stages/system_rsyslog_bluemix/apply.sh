@@ -19,7 +19,7 @@ curl -L -o $chroot/tmp/rsyslog-relp_8.34.0-0adiscon2xenial1_amd64.deb "https://s
 run_in_chroot $chroot "
 cd /tmp
 
-dpkg -i --force-confold libfastjson4_0.99.8-2_amd64.deb \
+dpkg -i --force-confnew libfastjson4_0.99.8-2_amd64.deb \
     librelp0_1.2.15-0adiscon1xenial1_amd64.deb \
     rsyslog-relp_8.34.0-0adiscon2xenial1_amd64.deb \
     rsyslog-mmjsonparse_8.34.0-0adiscon2xenial1_amd64.deb \

@@ -125,7 +125,7 @@ shared_examples_for 'every OS image' do
     describe file('/etc/logrotate.d/rsyslog') do
       it { should be_file }
 
-      it 'should reload rsyslog on rotate' do
+      it 'should reload rsyslog on rotate', exclude_on_softlayer: true do
         expect(subject.content).to match /sudo kill -SIGHUP \$\(cat \/var\/run\/rsyslogd\.pid\)/
       end
 
@@ -133,7 +133,7 @@ shared_examples_for 'every OS image' do
         expect(subject.content).not_to match 'restart rsyslog'
       end
 
-      it 'should configure the news services' do
+      it 'should configure the news services', exclude_on_softlayer: true do
         expect(subject.content).to match '/var/log/news/news.crit'
         expect(subject.content).to match '/var/log/news/news.err'
         expect(subject.content).to match '/var/log/news/news.notice'
