@@ -23,15 +23,44 @@ ln -s /etc/sv/monit /etc/service/monit
 
 # Alerts for monit config
 cp -a $assets_dir/alerts.monitrc $chroot/var/vcap/monit/alerts.monitrc
-
 cd $assets_dir
-if is_ppc64le; then
-  curl -L -o bosh-agent "https://s3.amazonaws.com/bosh-agent-binaries/bosh-agent-2.117.4-linux-ppc64le"
-  echo "10fca7c11bed31ff982f5b6e63839e6fd660acaab20b0b6afb10fa7883631140  bosh-agent" | shasum -a 256 -c -
+
+curl_it() {
+  agent_address="${1}"
+  download_agent_attempt_count=0
+  set +e
+  until [ $download_agent_attempt_count -ge 5 ]
+  do
+    curl -L -o bosh-agent ${agent_address} && break
+    download_agent_attempt_count=$((download_agent_attempt_count+1))
+  done
+
+  if [ ! -e bosh-agent ]; then
+    echo "Failed to download agent"
+    exit 1
+  fi
+  set -e
+}
+
+os_type="$(get_os_type)"
+if [ "${os_type}" == "ubuntu" ] && [ "${DISTRIB_CODENAME}" == "trusty" ]; then
+  if is_ppc64le; then
+    curl_it "https://s3.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.0-go-1.8-linux-ppc64le"
+    echo "d3dbfec3c43d8ec5980096faf645b7543c4a17f35fd3e260fb1c7938328d93fd  bosh-agent" | shasum -a 256 -c -
+  else
+    curl_it "https://s3.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.0-go-1.8-linux-amd64"
+    echo "e180085d725a218d5e6989c567f9fce9ea3ea8b8c681f176dcf0e677c79bfa59  bosh-agent" | shasum -a 256 -c -
+  fi
 else
-  curl -L -o bosh-agent "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.117.0-ng.19-linux-amd64"
-  echo "56918e3f737c91fabcc440888b00884a96a32f4dcc2a4702180ed31c654703c7  bosh-agent" | shasum -a 256 -c -
+  if is_ppc64le; then
+    curl_it "https://s3-external-1.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.1-linux-ppc64le"
+    echo "0111b3486f017ad07c66e1cb6076c7f7f6cc556441fb1221bac151fc0a6755a0  bosh-agent" | shasum -a 256 -c -
+  else
+    curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.117.0-ng.19-linux-amd64"
+    echo "56918e3f737c91fabcc440888b00884a96a32f4dcc2a4702180ed31c654703c7  bosh-agent" | shasum -a 256 -c -
+  fi
 fi
+
 mv bosh-agent $chroot/var/vcap/bosh/bin/
 
 cp $assets_dir/bosh-agent-rc $chroot/var/vcap/bosh/bin/bosh-agent-rc

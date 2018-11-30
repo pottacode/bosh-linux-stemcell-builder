@@ -16,7 +16,6 @@ bison
 bsdmainutils
 bsdutils
 build-essential
-busybox-initramfs
 bzip2
 ca-certificates
 cloud-guest-utils
@@ -73,7 +72,6 @@ hostname
 htop
 ifupdown
 init-system-helpers
-initramfs-tools
 initramfs-tools-bin
 initscripts
 insserv
@@ -170,7 +168,6 @@ libgssapi-krb5-2:amd64
 libgssapi3-heimdal:amd64
 libgssglue1:amd64
 libgssrpc4:amd64
-libgt0
 libhcrypto4-heimdal:amd64
 libheimbase1-heimdal:amd64
 libheimntlm0-heimdal:amd64
@@ -389,7 +386,6 @@ tcpdump
 traceroute
 tzdata
 ubuntu-keyring
-ubuntu-minimal
 ucf
 udev
 unattended-upgrades
