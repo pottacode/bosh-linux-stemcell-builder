@@ -11,7 +11,5 @@ sed "/^ *PermitRootLogin/d" -i $chroot/etc/ssh/sshd_config
 echo 'PermitRootLogin yes' >> $chroot/etc/ssh/sshd_config
 
 sed "/^ *AllowGroups/d" -i $chroot/etc/ssh/sshd_config
-#echo 'AllowGroups bosh_sshers' >> $chroot/etc/ssh/sshd_config
 
 sed "/^ *DenyUsers/d" -i $chroot/etc/ssh/sshd_config
-#echo 'DenyUsers root' >> $chroot/etc/ssh/sshd_config

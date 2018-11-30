@@ -4,6 +4,7 @@ groups:
     jobs:
       - start-job
       - create-story
+      - create-story-usn
       - build-ubuntu-trusty-image
       - build-centos-7-image
       - bump-os-images
@@ -23,6 +24,7 @@ groups:
       - build-vsphere-esxi-centos-7
       - build-vsphere-esxi-ubuntu-trusty
       - build-vcloud-esxi-ubuntu-trusty
+      - build-alicloud-kvm-ubuntu-trusty
       - bats-centos
       - bats-ubuntu
       - delivery
@@ -46,10 +48,13 @@ groups:
     jobs:
       - build-vsphere-esxi-ubuntu-trusty
       - build-vsphere-esxi-centos-7
+  - name: alicloud
+    jobs:
+      - build-alicloud-kvm-ubuntu-trusty
   - name: vcloud
     jobs:
       - build-vcloud-esxi-ubuntu-trusty
-  - name: ubuntu
+  - name: ubuntu-trusty
     jobs:
       - build-aws-xen-hvm-ubuntu-trusty
       - build-azure-hyperv-ubuntu-trusty
@@ -57,6 +62,7 @@ groups:
       - build-openstack-kvm-ubuntu-trusty
       - build-vsphere-esxi-ubuntu-trusty
       - build-vcloud-esxi-ubuntu-trusty
+      - build-alicloud-kvm-ubuntu-trusty
   - name: centos
     jobs:
       - build-aws-xen-hvm-centos-7
@@ -124,6 +130,9 @@ jobs:
         - get: bosh-linux-stemcell-builder
         - get: every-2-weeks-on-monday
           trigger: true
+        - get: trusty-usn
+          trigger: true
+
   - name: create-story
     plan:
       - aggregate:
@@ -136,10 +145,29 @@ jobs:
           BRANCH: master
           PROJECT_ID: ((story_creator_tracker_project_id))
           TOKEN: ((story_creator_tracker_token))
+          DESCRIPTION: "periodic bump"
+
+  - name: create-story-usn
+    plan:
+      - aggregate:
+        - get: trusty-usn
+          trigger: true
+        - get: bosh-linux-stemcell-builder
+      - task: create-story
+        file: bosh-linux-stemcell-builder/ci/tasks/create-story.yml
+        params:
+          BRANCH: master
+          PROJECT_ID: ((story_creator_private_tracker_project_id))
+          TOKEN: ((story_creator_tracker_token))
+          DESCRIPTION: "ubuntu *security* notice"
 
   - name: build-ubuntu-trusty-image
     plan:
       - get: bosh-linux-stemcell-builder
+        trigger: true
+        passed:
+          - start-job
+      - get: every-2-weeks-on-monday
         trigger: true
         passed:
           - start-job
@@ -160,6 +188,10 @@ jobs:
         trigger: true
         passed:
           - start-job
+      - get: every-2-weeks-on-monday
+        trigger: true
+        passed:
+          - start-job
       - task: build
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
         privileged: true
@@ -175,6 +207,11 @@ jobs:
     plan:
       - aggregate:
           - get: bosh-linux-stemcell-builder
+            trigger: true
+            passed:
+              - build-ubuntu-trusty-image
+              - build-centos-7-image
+          - get: every-2-weeks-on-monday
             trigger: true
             passed:
               - build-ubuntu-trusty-image
@@ -246,6 +283,7 @@ jobs:
             - build-azure-hyperv-centos-7
             - build-openstack-kvm-centos-7
             - build-vsphere-esxi-centos-7
+            - build-alicloud-kvm-ubuntu-trusty
         - get: bosh-linux-stemcell-builder
         - get: bosh-deployment
         - get: bosh-cli
@@ -265,8 +303,6 @@ jobs:
           - task: deploy-director
             tags: [vsphere-v6.5]
             file: bosh-linux-stemcell-builder/ci/tasks/deploy-director.yml
-            input_mapping:
-              stemcell: vsphere-esxi-ubuntu-trusty
             params:
               BOSH_vcenter_ip:          ((vcenter-ip))
               BOSH_vcenter_user:        ((vcenter-user))
@@ -294,8 +330,6 @@ jobs:
           - task: deploy-director-ipv6
             tags: [vsphere-v6.5]
             file: bosh-linux-stemcell-builder/ci/tasks/deploy-director-ipv6.yml
-            input_mapping:
-              stemcell: vsphere-esxi-ubuntu-trusty
             params:
               BOSH_vcenter_ip:          ((vcenter-ip))
               BOSH_vcenter_user:        ((vcenter-user))
@@ -666,6 +700,36 @@ jobs:
           rebase: true
 
   #
+  # AliCloud
+  #
+
+  - name: build-alicloud-kvm-ubuntu-trusty
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+      - task: create-stemcell
+        file: bosh-linux-stemcell-builder/ci/tasks/build.yml
+        privileged: true
+        params:
+          IAAS:         alicloud
+          HYPERVISOR:   kvm
+          OS_NAME:      ubuntu
+          OS_VERSION:   trusty
+      - aggregate:
+        - put: alicloud-kvm-ubuntu-trusty
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
   # vCloud
   #
 
@@ -751,9 +815,6 @@ jobs:
 
       - do:
         - <<: *deploy-director
-          input_mapping:
-            stemcell: ubuntu-stemcell
-
         - <<: *prepare-bats-config
           params:
             STEMCELL_NAME: bosh-vsphere-esxi-centos-7-go_agent
@@ -795,6 +856,7 @@ jobs:
           - build-azure-hyperv-centos-7
           - build-openstack-kvm-centos-7
           - build-vsphere-esxi-centos-7
+          - build-alicloud-kvm-ubuntu-trusty
       - get: version
         passed:
           - build-warden-boshlite-centos-7
@@ -810,13 +872,12 @@ jobs:
           - build-azure-hyperv-centos-7
           - build-openstack-kvm-centos-7
           - build-vsphere-esxi-centos-7
-
+          - build-alicloud-kvm-ubuntu-trusty
     - do:
       - {put: environment, params: {acquire: true}}
 
       - do:
         - <<: *deploy-director
-
         - <<: *prepare-bats-config
           params:
             STEMCELL_NAME: bosh-vsphere-esxi-ubuntu-trusty-go_agent
@@ -842,6 +903,12 @@ jobs:
         params:
           repos:
           - bosh-linux-stemcell-builder
+
+resource_types:
+- name: usn
+  type: docker-image
+  source:
+    repository: bosh/usn-resource
 
 resources:
   - name: bosh-linux-stemcell-builder
@@ -992,6 +1059,16 @@ resources:
       regexp: vsphere/bosh-stemcell-(.+)-vsphere-esxi-centos-7-go_agent.tgz
 
   #
+  # AliCloud
+  #
+
+  - name: alicloud-kvm-ubuntu-trusty
+    type: s3
+    source:
+      <<: *stemcell_bucket
+      regexp: alicloud/bosh-stemcell-(.+)-alicloud-kvm-ubuntu-trusty-go_agent.tgz
+
+  #
   # vCloud
   #
 
@@ -1066,3 +1143,9 @@ resources:
       location: America/Los_Angeles
       days: [Monday]
       interval: 192h
+
+  - name: trusty-usn
+    type: usn
+    source:
+      os: ubuntu-14.04-lts
+      priorities: [high, critical, unknown]
