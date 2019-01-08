@@ -221,7 +221,6 @@ module Bosh::Stemcell
         :system_softlayer_open_iscsi,
         :system_softlayer_multipath_tools,
         :system_parameters,
-        :system_rsyslog_bluemix,
         :bosh_clean,
         :bosh_harden,
         :bosh_enable_password_authentication,
