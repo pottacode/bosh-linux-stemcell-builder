@@ -46,8 +46,8 @@ if is_ppc64le; then
   curl_it "https://s3-external-1.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.4-linux-ppc64le"
   echo "6f4c3f75a2931035cc0d6939b90a3318a32e6ec173d9432b5690bb34d6b23746  bosh-agent" | shasum -a 256 -c -
 else
-  curl_it "https://s3-external-1.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.4-linux-amd64"
-  echo "76c8a826128999b1b548a0e0f544d6074a97e6c197287877115dba99de8a42f1  bosh-agent" | shasum -a 256 -c -
+  curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.117.0-ng.28-linux-amd64"
+  echo "9eee1e214f70dabe3aadb58c4067d5ac19725485c8eee3846d4177dfd6d61bf8  bosh-agent" | shasum -a 256 -c -
 fi
 
 mv bosh-agent $chroot/var/vcap/bosh/bin/
