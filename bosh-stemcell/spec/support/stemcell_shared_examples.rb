@@ -94,8 +94,14 @@ enable-kernel-logging.conf
   end
 
   describe 'logrotate' do
+    describe command('grep ionice /usr/bin/logrotate-cron') do
+      its(:stdout) { should match(%r{^\s*nice -n 19 ionice -c3 /usr/sbin/logrotate\b}) }
+    end
+
     describe 'should rotate every 15 minutes' do
       describe file('/etc/cron.d/logrotate') do
+        it { should be_mode(0o600) }
+
         it 'lists the schedule precisely' do
           expect(subject.content).to match /\A0,15,30,45 \* \* \* \* root \/usr\/bin\/logrotate-cron\Z/
         end
