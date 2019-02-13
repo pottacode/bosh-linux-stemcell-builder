@@ -42,9 +42,14 @@ curl_it() {
   set -e
 }
 
+wget -O /usr/bin/meta4 https://github.com/dpb587/metalink/releases/download/v0.2.0/meta4-0.2.0-linux-amd64 \
+  && echo "81a592eaf647358563f296aced845ac60d9061a45b30b852d1c3f3674720fe19  /usr/bin/meta4" | shasum -a 256 -c \
+  && chmod +x /usr/bin/meta4
+
+os_type="$(get_os_type)"
+bosh_agent_version=$(cat ${assets_dir}/bosh-agent-version)
 if is_ppc64le; then
-  curl_it "https://s3-external-1.amazonaws.com/bosh-agent-binaries/bosh-agent-2.160.5-linux-ppc64le"
-  echo "eba283b649a11b3a8616152c0de2db9955c2ff198ac26420f80244c62ba73270  bosh-agent" | shasum -a 256 -c -
+  /usr/bin/meta4 file-download --metalink=${assets_dir}/metalink.meta4 --file=bosh-agent-${bosh_agent_version}-linux-ppc64le bosh-agent
 else
   curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.117.0-ng.19-linux-amd64"
   echo "56918e3f737c91fabcc440888b00884a96a32f4dcc2a4702180ed31c654703c7  bosh-agent" | shasum
@@ -53,7 +58,6 @@ fi
 mv bosh-agent $chroot/var/vcap/bosh/bin/
 
 cp $assets_dir/bosh-agent-rc $chroot/var/vcap/bosh/bin/bosh-agent-rc
-cp $assets_dir/mbus/agent.{cert,key} $chroot/var/vcap/bosh/
 
 # Download CLI source or release from github into assets directory
 cd $assets_dir
@@ -69,7 +73,6 @@ chmod +x $chroot/var/vcap/bosh/bin/bosh-blobstore-dav
 chmod +x $chroot/var/vcap/bosh/bin/bosh-agent
 chmod +x $chroot/var/vcap/bosh/bin/bosh-agent-rc
 chmod +x $chroot/var/vcap/bosh/bin/bosh-blobstore-dav
-chmod 600 $chroot/var/vcap/bosh/agent.key
 
 # Setup additional permissions
 run_in_chroot $chroot "

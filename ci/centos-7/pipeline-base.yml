@@ -1,10 +1,6 @@
 groups: []
 jobs: []
 resource_types:
-- name: usn
-  type: docker-image
-  source:
-    repository: bosh/usn-resource
 - name: metalink-repository
   type: docker-image
   source:
@@ -21,14 +17,6 @@ resources:
     private_key: ((boshio_stemcells_index_key))
     uri: git@github.com:bosh-io/stemcells-core-index.git
   type: git
-- name: syslog-release
-  source:
-    repository: cloudfoundry/syslog-release
-  type: bosh-io-release
-- name: os-conf-release
-  source:
-    repository: cloudfoundry/os-conf-release
-  type: bosh-io-release
 - name: bosh-deployment
   source:
     branch: master
@@ -47,6 +35,13 @@ resources:
     private_key: ((github_deployment_key__bosh-cpi-environments))
     uri: git@github.com:pivotal-cf-experimental/bats-concourse-pool.git
   type: pool
+- name: gh-release
+  type: github-release
+  source:
+    owner: cloudfoundry
+    repository: bosh-linux-stemcell-builder
+    access_token: ((github_bosh_linux_stemcell_builder_release_maker_token))
+    drafts: true
 - name: every-2-weeks-on-monday
   type: time
   source:
@@ -55,16 +50,3 @@ resources:
     location: America/Los_Angeles
     days: [Monday]
     interval: 192h
-- name: gh-release
-  type: github-release
-  source:
-    owner: cloudfoundry
-    repository: bosh-linux-stemcell-builder
-    access_token: ((github_bosh_linux_stemcell_builder_release_maker_token))
-    drafts: true
-- name: xenial-usn
-  type: usn
-  source:
-    os: ubuntu-16.04-lts
-    priorities: [high, critical]
-
