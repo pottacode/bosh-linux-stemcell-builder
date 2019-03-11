@@ -21,7 +21,8 @@ cat > $chroot/var/vcap/bosh/agent.json <<JSON
         {
           "Type": "HTTP",
           "URI": "https://api.service.softlayer.com",
-          "UserDataPath": "/rest/v3.1/SoftLayer_Resource_Metadata/getUserMetadata.json"
+          "UserDataPath": "/rest/v3.1/SoftLayer_Resource_Metadata/getUserMetadata.json",
+          "HTTPRegistryCachePreferred": true
         }
       ],
       "UseServerName": true,
