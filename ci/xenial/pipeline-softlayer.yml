@@ -12,6 +12,7 @@ groups:
       - new-stemcell-version
       - publish-stemcells
       - post-stemcells
+      - deploy-vm
 
 shared:
   - &deploy-director
@@ -286,6 +287,29 @@ jobs:
           only_tag: true
           repository: bosh-linux-stemcell-builder
           tag: version-tag/tag
+
+  - name: deploy-vm
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+            passed:
+              - publish-stemcells
+          - get: stemcell
+            passed:
+              - publish-stemcells
+            resource: light-softlayer-stemcell-prod
+          - get: bosh-linux-stemcell-builder-master
+          - get: stemcells-index
+      - task: build-stemcell
+        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/deploy-vm.yml
+        params:
+          OS_NAME: ubuntu
+          OS_VERSION: xenial
+          PUBLISHED_BUCKET_NAME: bosh-softlayer-cpi-stemcells
+          SL_API_KEY: {{softlayer-api-key}}
+          SL_USERNAME:  {{softlayer-username}}
+          VM_ID:  {{softlayer-vm-id}}
 
   - name: post-stemcells
     serial: true
