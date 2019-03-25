@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -x -u
+set -o errexit -o nounset -o pipefail
 
 function check_param() {
   local name=$1
