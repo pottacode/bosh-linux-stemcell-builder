@@ -24,8 +24,8 @@ apt-get install curl -y
 
 tar zxvf stemcell/*.tgz  -C ./
 image_id=`grep "virtual-disk-image-id:" stemcell.MF| cut -d ":" -f2 | sed 's/^[ \t]*//g' `
-
-result_str=`curl --silent -X POST -d '{"parameters":[ "FORCE",  { "imageTemplateId": "'$image_id'" }] }' https://$SL_USERNAME:$SL_API_KEY@api.softlayer.com/rest/v3/SoftLayer_Virtual_Guest/$VM_ID/reloadOperatingSystem.json`
+sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
+result_str=`curl --silent -X POST -d '{"parameters":[ "FORCE",  { "imageTemplateId": "'$image_id'" }] }' https://$sl_username:$SL_API_KEY@api.softlayer.com/rest/v3/SoftLayer_Virtual_Guest/$VM_ID/reloadOperatingSystem.json`
 result=`echo $result_str |sed 's/\"//g'`
 if [ "$result" != "1" ] ; then
    echo "Reload vm failed"
