@@ -1,0 +1,25 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bosh/os-image-stemcell-publisher
+
+inputs:
+  - name: version
+  - name: bosh-linux-stemcell-builder-master
+    path: bosh-linux-stemcell-builder
+  - name: stemcell
+  - name: stemcells-index
+run:
+  path: bosh-linux-stemcell-builder/ci/softlayer/tasks/deploy-vm.sh
+
+params:
+  PUBLISHED_BUCKET_NAME: required
+  OS_NAME:               required
+  OS_VERSION:            required
+  SL_API_KEY:            required
+  SL_USERNAME:           required
+  VM_ID:                 required
+  
