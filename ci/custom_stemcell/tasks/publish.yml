@@ -11,8 +11,9 @@ inputs:
   - name: light-bluemix-stemcell
   - name: version
 outputs:
-  - name: light-bluemix-stemcell-prod
+  - name: bluemix-stemcell
 
 run:
   path: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/publish.sh
+
 

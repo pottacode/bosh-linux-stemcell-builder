@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -e -x
 
-mkdir -p light-bluemix-stemcell-prod
-cp light-bluemix-stemcell/*.tgz light-bluemix-stemcell-prod/
-
-fileUrl=https://s3-api.us-geo.objectstorage.softlayer.net/${PUBLISHED_BUCKET_NAME}/${file}
+VERSION=$(cat version/number | sed 's/\.0$//;s/\.0$//')
+mkdir -p bluemix-stemcell
+cp light-bluemix-stemcell/*.tgz bluemix-stemcell/
+                                                                                    
+fileUrl=https://s3.us.cloud-object-storage.appdomain.cloud/${PUBLISHED_BUCKET_NAME}/light-bosh-stemcell-${VERSION}-bluemix-xen-ubuntu-xenial-go_agent.tgz
 echo -e "Stemcell Download URL -> ${fileUrl}"
 checksum=`curl -L ${fileUrl} | sha1sum | cut -d " " -f 1`
 echo -e "Sha1 hashcode -> $checksum"

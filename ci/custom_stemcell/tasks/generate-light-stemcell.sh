@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -o errexit -o nounset -o pipefail
 
 echo -e "Set up softlayer cli login"
 cat <<EOF > ~/.softlayer
@@ -26,7 +26,7 @@ mkdir -p ${output_dir}
 pushd ${output_dir}
 echo -e "Compose stemcell.MF"
 cat <<EOF > stemcell.MF
-name: bosh-bluemix-xen-ubuntu-trusty-go_agent
+name: bosh-bluemix-xen-ubuntu-xenial-go_agent
 version: "${stemcell_version}"
 bosh_protocol: 1
 sha1: MTYxMzE1MTplYWNlZDU0Ni04ODU4LTRhZWMtYmE0Yy01NmYxZTgzMjExNGTaOaPuXmtLDTJVv++VYBiQr9gHCQ==
@@ -48,7 +48,7 @@ stemcell_filename=light-bosh-stemcell-${stemcell_version}-${IAAS}-${HYPERVISOR}-
 tar zcvf $stemcell_filename image stemcell.MF
 checksum="$(sha1sum "${stemcell_filename}" | awk '{print $1}')"
 
-fileUrl=https://s3-api.us-geo.objectstorage.softlayer.net/bosh-softlayer-custom-bluemix-stemcell-candidate/${stemcell_filename}
+fileUrl=https://s3.us.cloud-object-storage.appdomain.cloud/bluemix-stemcell-version/${stemcell_filename}
 echo -e "Stemcell Download URL -> ${fileUrl}"
 sha1=`curl -L ${fileUrl} | sha1sum | cut -d " " -f 1`
 echo -e "Sha1 hashcode -> $checksum"
