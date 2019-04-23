@@ -31,6 +31,7 @@ curl_cmd="curl --silent -u $sl_username:$SL_API_KEY https://api.service.softlaye
 
 # check if the VM is ready for os-reload (no active transaction)
 response=`$curl_cmd`
+echo $response
 if [[ $response =~ "activeTransaction" ]]
 then
     echo "There is active transactions running on the VM. Can't do OS relaod for now."
@@ -53,13 +54,14 @@ fi
 while true
 do
 	response=`$curl_cmd`
+	echo $response
 	if [[ $response =~ "activeTransaction" ]]
 	then
-        echo "Reload launched!"
+        echo "Reload started!"
         break
 	else
-        echo "No active transaction yet. Waiting for OS reload to launch!"
-        sleep 5
+        echo "No active transaction yet. Waiting for OS reload to start!"
+        sleep 2
 	fi
 done
 
@@ -67,9 +69,9 @@ done
 while true
 do
 	response=`$curl_cmd`
+	echo $response
 	if [[ $response =~ "activeTransaction" ]]
 	then
-        echo $response
         sleep 30
 	else
         echo "No active transaction. OS reload done!"
