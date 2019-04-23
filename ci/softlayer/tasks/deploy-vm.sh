@@ -22,12 +22,8 @@ echo "[INFO] Install dependencies packages"
 apt-get update
 apt-get install curl -y
 
-tar zxvf stemcell/*.tgz  -C ./
-image_id=`grep "virtual-disk-image-id:" stemcell.MF| cut -d ":" -f2 | sed 's/^[ \t]*//g' `
-sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
-
 # get active transaction curl command
-curl_cmd="curl --silent -u $sl_username:$SL_API_KEY https://api.service.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/$VM_ID.json?objectMask=mask%5Bid%2C+activeTransaction%5Bid%2CtransactionStatus.name%5D%5D"
+curl_cmd="curl --silent -u $SL_USERNAME:$SL_API_KEY https://api.service.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/$VM_ID.json?objectMask=mask%5Bid%2C+activeTransaction%5Bid%2CtransactionStatus.name%5D%5D"
 
 # check if the VM is ready for os-reload (no active transaction)
 response=`$curl_cmd`
@@ -41,6 +37,10 @@ else
 fi
 
 # do os-reload
+tar zxvf stemcell/*.tgz  -C ./
+image_id=`grep "virtual-disk-image-id:" stemcell.MF| cut -d ":" -f2 | sed 's/^[ \t]*//g' `
+sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
+
 result_str=`curl --silent -X POST -d '{"parameters":[ "FORCE",  { "imageTemplateId": "'$image_id'" }] }' https://$sl_username:$SL_API_KEY@api.softlayer.com/rest/v3/SoftLayer_Virtual_Guest/$VM_ID/reloadOperatingSystem.json`
 result=`echo $result_str |sed 's/\"//g'`
 if [ "$result" != "1" ] ; then
