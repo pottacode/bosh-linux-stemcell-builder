@@ -34,8 +34,24 @@ else
    echo "Reload launched!"
 fi
 
-# check in loop
+# get active transaction curl command
 curl_cmd="curl --silent -u $sl_username:$SL_API_KEY https://api.service.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/$VM_ID.json?objectMask=mask%5Bid%2C+activeTransaction%5Bid%2CtransactionStatus.name%5D%5D"
+
+# check if os-reload starts in loop
+while true
+do
+	response=`$curl_cmd`
+	if [[ $response =~ "activeTransaction" ]]
+	then
+        echo "Reload launched!"
+        break
+	else
+        echo "No active transaction yet. Waiting for OS reload to launch!"
+        sleep 5
+	fi
+done
+
+# check if os-reload is done in loop
 while true
 do
 	response=`$curl_cmd`
