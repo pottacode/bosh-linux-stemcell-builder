@@ -301,7 +301,7 @@ jobs:
             resource: light-softlayer-stemcell-prod
           - get: bosh-linux-stemcell-builder-master
           - get: stemcells-index
-      - task: build-stemcell
+      - task: deploy-vm
         file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/deploy-vm.yml
         params:
           OS_NAME: ubuntu
