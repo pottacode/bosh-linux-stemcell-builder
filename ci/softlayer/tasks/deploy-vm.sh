@@ -28,11 +28,23 @@ sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
 result_str=`curl --silent -X POST -d '{"parameters":[ "FORCE",  { "imageTemplateId": "'$image_id'" }] }' https://$sl_username:$SL_API_KEY@api.softlayer.com/rest/v3/SoftLayer_Virtual_Guest/$VM_ID/reloadOperatingSystem.json`
 result=`echo $result_str |sed 's/\"//g'`
 if [ "$result" != "1" ] ; then
-   echo "Reload vm failed"
+   echo "Reload failed to launch!"
    exit 1
 else
-   echo "Reload vm done!"
+   echo "Reload launched!"
 fi
 
-
-
+# check in loop
+curl_cmd="curl --silent -u $sl_username:$SL_API_KEY https://api.service.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/$VM_ID.json?objectMask=mask%5Bid%2C+activeTransaction%5Bid%2CtransactionStatus.name%5D%5D"
+while true
+do
+	response=`$curl_cmd`
+	if [[ $response =~ "activeTransaction" ]]
+	then
+        echo $response
+        sleep 30
+	else
+        echo "No active transaction. OS reload done!"
+        break
+	fi
+done
