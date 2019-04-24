@@ -10,8 +10,8 @@ groups:
       - bats-ubuntu
       - test-unit
       - new-stemcell-version
-      - publish-stemcells
-      - post-stemcells
+      - promote-stemcells-s3
+      - publish-stemcells-boshio
       - deploy-vm
 
 shared:
@@ -258,7 +258,7 @@ jobs:
           params:
             release: environment
 
-  - name: publish-stemcells
+  - name: promote-stemcells-s3
     serial: true
     plan:
       - aggregate:
@@ -294,10 +294,10 @@ jobs:
       - aggregate:
           - get: version
             passed:
-              - publish-stemcells
+              - promote-stemcells-s3
           - get: stemcell
             passed:
-              - publish-stemcells
+              - promote-stemcells-s3
             resource: light-softlayer-stemcell-prod
           - get: bosh-linux-stemcell-builder-master
           - get: stemcells-index
@@ -311,16 +311,16 @@ jobs:
           SL_USERNAME:  ((softlayer-username))
           VM_ID:  ((softlayer-vm-id))
 
-  - name: post-stemcells
+  - name: publish-stemcells-boshio
     serial: true
     plan:
       - aggregate:
           - get: version
             passed:
-              - publish-stemcells
+              - promote-stemcells-s3
           - get: stemcell
             passed:
-              - publish-stemcells
+              - promote-stemcells-s3
             resource: light-softlayer-stemcell-prod
           - get: bosh-linux-stemcell-builder-master
           - get: stemcells-index
