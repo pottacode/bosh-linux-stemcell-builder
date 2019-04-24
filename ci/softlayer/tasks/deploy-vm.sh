@@ -21,6 +21,7 @@ export VERSION=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
 echo "[INFO] Install dependencies packages"
 apt-get update
 apt-get install curl -y
+apt-get install sshpass -y
 
 # get active transaction curl command
 curl_cmd="curl --silent -u $SL_USERNAME:$SL_API_KEY https://api.service.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/$VM_ID.json?objectMask=mask%5Bid%2C+activeTransaction%5Bid%2CtransactionStatus.name%5D%5D"
@@ -37,7 +38,7 @@ else
 fi
 
 # do os-reload
-tar zxvf stemcell/*.tgz  -C ./
+tar zxf stemcell/*.tgz  -C ./
 image_id=`grep "virtual-disk-image-id:" stemcell.MF| cut -d ":" -f2 | sed 's/^[ \t]*//g' `
 sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
 
@@ -57,7 +58,7 @@ do
 	echo $response
 	if [[ $response =~ "activeTransaction" ]]
 	then
-        echo "Reload started!"
+        echo "OS reload started!"
         break
 	else
         echo "No active transaction yet. Waiting for OS reload to start!"
@@ -78,3 +79,18 @@ do
         break
 	fi
 done
+
+# check /var/vcap/bosh/etc/stemcell_version in the reloaded vm $VM_ID
+root_pwd=`slcli vs detail --passwords $VM_ID | grep users | awk -F ' ' '{print $4}'`
+private_ip=`slcli vs detail --passwords $VM_ID | grep "private_ip" | awk -F ' ' '{print $2}'`
+stemcell_version_vm=`sshpass -p $root_pwd ssh -o StrictHostKeychecking=no root@$private_ip "cat /var/vcap/bosh/etc/stemcell_version"`
+echo "/var/vcap/bosh/etc/stemcell_version file on VM $VM_ID is $stemcell_version_vm"
+stemcell_version_target=`cat stemcell/version`
+echo "stemcell_version_target is $stemcell_version_target"
+if [[ $stemcell_version_vm == $stemcell_version_target ]]
+then
+    echo "stemcell_version check on $VM_ID PASSED!"
+else
+    echo "stemcell_version check on $VM_ID FAILED!"
+    exit 1
+fi
