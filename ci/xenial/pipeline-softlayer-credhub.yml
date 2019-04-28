@@ -248,10 +248,10 @@ jobs:
           params:
             BOSH_os_name: ubuntu-xenial
             package: ipv4director
-        ensure:
-          do:
-          - task: teardown
-            file: bosh-linux-stemcell-builder-master/ci/softlayer_ng/bats/tasks/destroy-director.yml
+#        ensure:
+#          do:
+#          - task: teardown
+#            file: bosh-linux-stemcell-builder-master/ci/softlayer_ng/bats/tasks/destroy-director.yml
     ensure:
       do:
         - put: environment
