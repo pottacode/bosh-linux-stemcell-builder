@@ -1,0 +1,13 @@
+---
+jobs:
+  - name: new-stemcell-version
+    plan:
+      - get: published-stemcell
+        trigger: true
+      - get: bosh-linux-stemcell-builder-master
+      - task: make-version
+        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/make-stemcell-version.yml
+      - put: stemcell-version
+        params:
+          file: version/number
+      - put: boshagent-version
