@@ -1,13 +1,59 @@
 ---
 jobs:
-  - name: new-stemcell-version
+  - name: new-boshagent-version
     plan:
       - get: published-stemcell
-        trigger: true
       - get: bosh-linux-stemcell-builder-master
       - task: make-version
-        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/make-stemcell-version.yml
-      - put: stemcell-version
-        params:
-          file: version/number
+        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/make-boshagent-version.yml
       - put: boshagent-version
+        params:
+          file: boshagent-version/number
+
+  - name: build-boshagent
+    plan:
+      - get: boshagent-version
+        trigger: true
+#        passed:
+#          - new-boshagent-version
+      - get: bosh-linux-stemcell-builder-master
+      - task: build-boshagent
+        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/build-boshagent.yml
+        params:
+          GITHUB_USER: ((github_user))
+          GITHUB_PASSWORD: ((github_password))
+      - put: boshagent-out
+        params:
+          file: boshagent-out/bosh-agent-*-sl-linux-amd64
+          acl: public-read
+
+resources:
+  - name: bosh-linux-stemcell-builder-master
+    type: git
+    source:
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
+      branch: master
+
+  - name: published-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-vsphere-esxi-ubuntu-xenial-go_agent
+      tarball: false
+
+  - name: boshagent-out
+    type: s3
+    source:
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+      bucket: ng-bosh-softlayer-agent
+      regexp: bosh-agent-(.*)-sl-linux-amd64
+
+  - name: boshagent-version
+    type: semver
+    source:
+      driver: s3
+      initial_version: 2.215.3
+      key: agent-current-version
+      bucket: ng-bosh-softlayer-agent
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
