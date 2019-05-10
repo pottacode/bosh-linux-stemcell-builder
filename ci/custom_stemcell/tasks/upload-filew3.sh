@@ -1,22 +1,31 @@
 #!/bin/bash
 
-set -e -x
+set -o errexit -o nounset -o pipefail
+output_dir="version"
+mkdir -p ${output_dir}
 
-export VERSION=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
-stemcell=$(realpath stemcell/*.tgz)
+[ -f stemcell/version ] || exit 1
+custom_version=$(cat stemcell/version)
+export VERSION=$custom_version
+stemcell=$(realpath *stemcell/*.tgz)
 
 echo -e "Check if the stemcell ${VERSION} already exists on file.w3.ibm.com"
-curl http://file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}/ | grep "200 OK"
+curl http://master.file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}/ | grep "404 Not Found" 
 if [[ $? != 0 ]]; then
   echo -e "The stemcell ${VERSION} already exists at http://file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}, exiting..."
   exit 1
 fi
 
 mkdir -p light-bosh-stecmcell/publish/${VERSION}
-echo $FILE_W3_STEMCELL_PEM > light-bosh-stecmcell/light-bosh-stecmcell.pem
+echo '-----BEGIN RSA PRIVATE KEY-----' >light-bosh-stecmcell/light-bosh-stecmcell.pem
+echo $FILE_W3_STEMCELL_PEM >> light-bosh-stecmcell/light-bosh-stecmcell.pem
+echo '-----END RSA PRIVATE KEY-----'>> light-bosh-stecmcell/light-bosh-stecmcell.pem
 cp ${stemcell} light-bosh-stecmcell/publish/${VERSION}/
 cd light-bosh-stecmcell
-scp -o "StrictHostKeyChecking no" -i light-bosh-stecmcell.pem -r publish/${VERSION} light-bosh-stemcell@file.w3.bluemix.net:~/repo
+apt-get update
+apt-get install ssh -y
+chmod 400 light-bosh-stecmcell.pem
+scp -o "StrictHostKeyChecking no" -i light-bosh-stecmcell.pem -r publish/${VERSION} light-bosh-stemcell@master.file.w3.bluemix.net:~/repo
 if [[ $? != 0 ]]; then
   echo -e "Uploading the light stemcell failed"
   exit 1

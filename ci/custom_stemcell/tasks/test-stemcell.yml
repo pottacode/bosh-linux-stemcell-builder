@@ -1,15 +1,10 @@
 platform: linux
 
-image_resource:
-  type: docker-image
-  source: {repository: bosh/main}
-
 inputs:
 - name: bosh-linux-stemcell-builder
-- name: bosh-cli
-- name: stemcell
-- name: syslog-release
-- name: director-state
+- name: light-bluemix-stemcell
+- name: version
+- name: deploy-yml
 
 run:
   path: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/test-stemcell.sh

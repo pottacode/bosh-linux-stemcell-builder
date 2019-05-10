@@ -6,10 +6,10 @@ image_resource:
   source:
     repository: bluebosh/slcli_py
 
+
 inputs:
   - name: bosh-linux-stemcell-builder
   - name: stemcell
-  - name: version
 
 run:
   path: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/upload-filew3.sh
