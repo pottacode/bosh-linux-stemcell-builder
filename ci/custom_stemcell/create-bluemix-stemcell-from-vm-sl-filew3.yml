@@ -6,52 +6,7 @@ groups:
       - capture-stemcell
       - generate-light-stemcell
       - test-stemcell
-      - promte-stemcell
-
-
-shared:
-  - &prepare-director
-    task: prepare-director
-    file: pipelines/softlayer/tasks/prepare-director.yml
-    params: &prepare-director-params
-      BOSH_CLIENT:                          ((stemcell-test-director-username))
-      BOSH_CLIENT_SECRET:                   ((stemcell-test-director-password))
-      SL_USERNAME:                          ((softlayer-username))
-      SL_API_KEY:                           ((softlayer-api-key))
-      SL_DATACENTER:                        ((softlayer-datacenter))
-      SL_VLAN_PUBLIC:                       ((softlayer-vlan-public))
-      SL_VLAN_PRIVATE:                      ((softlayer-vlan-private))
-      SL_VM_DOMAIN:                         ((softlayer-vm-domain))
-      SL_VM_NAME_PREFIX:                    ((softlayer-director-name-prefix))
-
-  - &deploy-director
-    task: deploy-director
-    file: pipelines/shared/tasks/deploy-director.yml
-    params: *prepare-director-params
-
-  - &prepare-bats
-    task: prepare-bats
-    file: pipelines/softlayer/tasks/prepare-bats.yml
-    params: &prepare-bats-params
-      BAT_VCAP_PASSWORD:      ((bat-vcap-password))
-      BOSH_CLIENT:            ((stemcell-test-director-username))
-      BOSH_CLIENT_SECRET:     ((stemcell-test-director-password))
-      SL_DATACENTER:          ((softlayer-datacenter))
-      SL_VLAN_PRIVATE:        ((softlayer-vlan-private))
-      SL_VLAN_PUBLIC:         ((softlayer-vlan-public))
-      SL_VM_DOMAIN:           ((softlayer-vm-domain))
-      SL_VM_NAME_PREFIX:      bats-experimental-
-      STEMCELL_NAME:          bosh-softlayer-xen-ubuntu-trusty-go_agent
-
-  - &run-bats
-    task: run-bats
-    file: pipelines/shared/tasks/run-bats.yml
-
-  - &teardown
-    task: teardown
-    file: pipelines/shared/tasks/teardown.yml
-    params:
-      DEPLOYMENT_NAME: certification
+      - promote-stemcell
 
 jobs:
   - name: customize-stemcell-version
@@ -107,7 +62,6 @@ jobs:
           file: light-stemcell/*.tgz
           acl: public-read
 
-
   - name: test-stemcell
     serial: true
     plan:
@@ -138,7 +92,7 @@ jobs:
           security_client_key: ((security_client_key.private_key))
           security_ca_pem: ((security_ca_pem.private_key))
 
-  - name: promte-stemcell
+  - name: promote-stemcell
     plan:
       - aggregate:
         - get: bosh-linux-stemcell-builder
@@ -147,7 +101,7 @@ jobs:
           passed: [test-stemcell]
         - get: version
           passed: [test-stemcell]
-      - task: promte-stemcell
+      - task: promote-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/publish.yml
         params:
           PUBLISHED_BUCKET_NAME: bluemix-custom-stemcell
@@ -184,6 +138,7 @@ resources:
       secret_access_key: ((stemcell-sl-os-secret-key))
       endpoint: ((stemcell-sl-os-endpoint))
 
+  # official light community stemcell
   - name: light-softlayer-stemcell-prod
     type: s3
     source:
@@ -192,6 +147,7 @@ resources:
       bucket: bosh-softlayer-cpi-stemcells
       regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-xenial-go_agent.tgz
 
+  # candidate light custom stemcell
   - name: light-bluemix-stemcell
     type: s3
     source:
@@ -201,6 +157,7 @@ resources:
       secret_access_key: ((stemcell-sl-os-secret-key))
       endpoint: ((stemcell-sl-os-endpoint))
 
+  # official light custom stemcell
   - name: bluemix-stemcell
     type: s3
     source:
@@ -211,7 +168,6 @@ resources:
       endpoint: ((stemcell-sl-os-endpoint))
 
   - name: pipeline-image
-    type: s3
     source:
       password: ((private-registry-docker-password-read-only))
       repository: registry.eu-gb.bluemix.net/concourse/ci-bluemix-pipelines
