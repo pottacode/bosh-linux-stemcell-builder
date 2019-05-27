@@ -156,8 +156,7 @@ describe 'Stig test case verification', stemcell_image: true, security_spec: tru
     case ENV['IAAS']
     when 'softlayer'
       expected_stig_test_cases = expected_stig_test_cases - [
-        'V-38613',
-        'V-75627'
+        'V-38613'
       ]
     end
 
