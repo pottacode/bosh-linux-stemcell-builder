@@ -12,16 +12,23 @@ timeout = 0
 EOF
 #echo "nameserver 114.114.114.114" > /etc/resolv.conf
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
 echo -e "\n Get stemcell version..."
 stemcell_version=$(cat version/number | sed 's/\.0$//;s/\.0$//')
 stemcell_id=`cat stemcell-info/stemcell-info-${stemcell_version}.json`
 echo -e "Get UUID of stemcell ${stemcell_id}"
 stemcell_uuid=`slcli image detail ${stemcell_id} | grep global_identifier | tr -s [:space:] | cut -d " " -f 2`
 
+
+
 # outputs
 output_dir="light-stemcell"
 mkdir -p ${output_dir}
+
+echo -e "Compose packages.txt and dev_tools_file_list.txt"
+tar zxf stemcell/*.tgz
+
+cp stemcell/packages.txt ${output_dir}
+cp stemcell/dev_tools_file_list.txt ${output_dir}
 
 pushd ${output_dir}
 echo -e "Compose stemcell.MF"
@@ -39,13 +46,15 @@ cloud_properties:
   virtual-disk-image-id: ${stemcell_id}
   virtual-disk-image-uuid: ${stemcell_uuid}
   datacenter-name: lon02
+stemcell_formats:
+- softlayer-light
 EOF
 
 echo -e "Compress light stemcell tgz file"
 touch image
 stemcell_filename=light-bosh-stemcell-${stemcell_version}-${IAAS}-${HYPERVISOR}-${OS_NAME}-${OS_VERSION}-go_agent.tgz
 
-tar zcvf $stemcell_filename image stemcell.MF
+tar zcvf $stemcell_filename image stemcell.MF packages.txt dev_tools_file_list.txt
 checksum="$(sha1sum "${stemcell_filename}" | awk '{print $1}')"
 
 fileUrl=https://s3.us.cloud-object-storage.appdomain.cloud/bluemix-stemcell-version/${stemcell_filename}

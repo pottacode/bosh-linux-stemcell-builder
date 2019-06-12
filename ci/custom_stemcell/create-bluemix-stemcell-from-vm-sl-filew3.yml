@@ -43,6 +43,8 @@ jobs:
     plan:
       - aggregate:
         - get: bosh-linux-stemcell-builder
+        - get: stemcell
+          resource: light-softlayer-stemcell-prod
         - get: stemcell-info
           passed: [capture-stemcell]        
         - get: version
