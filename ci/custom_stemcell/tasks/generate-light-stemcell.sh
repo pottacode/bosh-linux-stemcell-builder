@@ -25,7 +25,7 @@ output_dir="light-stemcell"
 mkdir -p ${output_dir}
 
 echo -e "Compose packages.txt and dev_tools_file_list.txt"
-tar zxf stemcell/*.tgz
+tar zxf stemcell/*.tgz -C stemcell
 
 cp stemcell/packages.txt ${output_dir}
 cp stemcell/dev_tools_file_list.txt ${output_dir}
