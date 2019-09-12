@@ -57,7 +57,7 @@ echo "The image private id is " ${private_image_id}
 echo -e "Convert the private image ${private_image_id} to a public image"
 sleep 5
 sl_username=`echo ${SL_USERNAME} |sed 's/@/%40/g'`
-echo "${para-id}" ${parameters-id}
+
 curl -X POST -d "{
   \"parameters\":
   [

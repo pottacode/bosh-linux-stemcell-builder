@@ -139,6 +139,9 @@ jobs:
           BUCKET: ((stemcell-transit-bucket))
           REGION: ((stemcell-sl-os-region))
           COS_SERVICE_ID_KEY: ((cos-service-id-key))
+          sl_para_id: ((sl_para_id))
+          longName: ((longName))
+          sl_para_name: ((sl_para_name))
       - put: stemcell-info
         params: {file: stemcell-image/stemcell-info.json}
 
