@@ -53,12 +53,13 @@ jobs:
       - task: generate-light-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/generate-light-stemcell.yml
         params:
+          stemcell_vm_id: ((softlayer-vm-id))
           HYPERVISOR: xen
           IAAS: bluemix
           OS_NAME: ubuntu
           OS_VERSION: xenial
-          SL_USERNAME: ((softlayer-username))
-          SL_API_KEY: ((softlayer-api-key))
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
       - put: light-bluemix-stemcell
         params: 
           file: light-stemcell/*.tgz
@@ -99,7 +100,7 @@ jobs:
       - aggregate:
         - get: bosh-linux-stemcell-builder
         - get: light-bluemix-stemcell
-          trigger: true
+#          trigger: true
           passed: [test-stemcell]
         - get: version
           passed: [test-stemcell]
