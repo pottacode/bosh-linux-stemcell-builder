@@ -166,8 +166,9 @@ jobs:
           OS_NAME: ubuntu
           OS_VERSION: xenial
           STEMCELL_FORMATS: softlayer-light
-          SL_USERNAME: ((softlayer-username))
-          SL_API_KEY: ((softlayer-api-key))
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          DATACENTER: ((sl_para_name))
         input_mapping:
           stemcell: softlayer-xen-ubuntu-xenial
       - put: light-softlayer-stemcell
