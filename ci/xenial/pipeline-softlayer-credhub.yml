@@ -121,7 +121,6 @@ jobs:
 
   - name: import-softlayer-stemcell
     plan:
-      - get: stemcell-cmds
       - get: bosh-softlayer-tools-master
       - get: bosh-softlayer-tools
       - get: version
@@ -148,7 +147,6 @@ jobs:
   - name: create-softlayer-light-stemcell
     plan:
       - aggregate:
-        - get: stemcell-cmds
         - get: bosh-softlayer-tools-master
         - get: bosh-softlayer-tools
         - get: softlayer-xen-ubuntu-xenial
@@ -365,14 +363,6 @@ resources:
     source:
       branch: container_based_stemcell_pipeline
       uri: https://github.com/bluebosh/bosh-softlayer-tools
-
-  - name: stemcell-cmds
-    type: s3
-    source:
-      access_key_id: ((stemcell-aws-access-key))
-      bucket: bosh-softlayer-artifacts
-      regexp: sl_stemcells-(.*)
-      secret_access_key: ((stemcell-aws-secret-key))
 
   - name: stemcell-info
     type: s3
