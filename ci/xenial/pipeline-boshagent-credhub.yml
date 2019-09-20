@@ -14,8 +14,8 @@ jobs:
     plan:
       - get: boshagent-version
         trigger: true
-#        passed:
-#          - new-boshagent-version
+        passed:
+          - new-boshagent-version
       - get: bosh-linux-stemcell-builder-master
       - task: build-boshagent
         file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/build-boshagent.yml

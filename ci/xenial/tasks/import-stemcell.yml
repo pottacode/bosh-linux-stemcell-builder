@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: bluebosh/slcli_py
+
+inputs:
+- name: bosh-linux-stemcell-builder-master
+- name: version
+
+outputs:
+- name: stemcell-image
+
+run:
+  path: bosh-linux-stemcell-builder-master/ci/xenial/tasks/import-stemcell.sh
