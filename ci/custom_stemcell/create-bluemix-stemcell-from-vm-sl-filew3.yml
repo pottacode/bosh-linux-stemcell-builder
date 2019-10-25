@@ -86,8 +86,8 @@ jobs:
           OS_NAME: ubuntu
           OS_VERSION: xenial
           RELEASE: ((security-release))
-          ALIAS: ((alias))
-          CA_CERT: ((boshcli_ca_cert.private_key))
+          ALIAS: ((alias_slcpi))
+          CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
           endpoint: ((stemcell-sl-os-endpoint))
           bucket: ((candidate-custom-bluemix-stemcell-bucket))
           filew3_server: ((file_w3_server))
