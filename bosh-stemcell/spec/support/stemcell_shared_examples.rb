@@ -121,6 +121,7 @@ HERE
       exclude_on_vsphere: true,
       exclude_on_azure: true,
       exclude_on_openstack: true,
+      exclude_on_softlayer: true,
     } do
       its(:content) { should eql(<<HERE) }
 #!/bin/bash
