@@ -94,3 +94,8 @@ else
     echo "stemcell_version check on $VM_ID FAILED!"
     exit 1
 fi
+
+# show "uname -a"
+uname_result=`sshpass -p $root_pwd ssh -o StrictHostKeychecking=no root@$private_ip "uname -a"`
+echo "'uname -a' result:"
+echo $uname_result
