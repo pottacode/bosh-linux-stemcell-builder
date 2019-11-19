@@ -230,6 +230,27 @@ jobs:
           params:
             release: environment
 
+  # test portable ip
+  - name: test-portable-ip
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+          - get: pipeline-image
+          - get: stemcell
+            trigger: true
+            resource: light-softlayer-stemcell
+            passed: [create-softlayer-light-stemcell]
+          - get: bosh-linux-stemcell-builder-master
+          - get: deploy-yml
+      - task: test-portable-ip
+        image: pipeline-image
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-portable-ip.yml
+        params:
+          ALIAS: ((alias_slcpi))
+          CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
+          PORTABLE_IP: ((portable_ip))
+
   - name: promote-stemcells-s3
     serial: true
     plan:
@@ -421,3 +442,18 @@ resources:
       secret_access_key: ((stemcell-aws-secret-key))
       bucket: bosh-softlayer-cpi-stemcells
       regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-xenial-go_agent.tgz
+
+  - name: pipeline-image
+    source:
+      password: ((private-registry-docker-password-read-only))
+      repository: registry.eu-gb.bluemix.net/concourse/ci-bluemix-pipelines
+      tag: latest
+      username: token
+    type: docker-image
+
+  - name: deploy-yml
+    type: git
+    source:
+      uri: git@github.ibm.com:BlueMix-Fabric/bosh-cdl-private
+      branch: master
+      private_key: ((bluemix_private_key.private_key))
