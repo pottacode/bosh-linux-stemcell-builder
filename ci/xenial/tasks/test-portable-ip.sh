@@ -8,8 +8,7 @@ stemcell_version=$(realpath stemcell/version | xargs -n 1 cat)
 echo "Login to bosh director"
 bosh2 envs
 echo "${CA_CERT}" >>~/.bosh/config
-bosh2 -e ${ALIAS} delete-stemcell bosh-softlayer-xen-ubuntu-xenial-go_agent/${stemcell_version} -n
-bosh2 -e ${ALIAS} upload-stemcell ${stemcell_path}
+bosh2 -e ${ALIAS} upload-stemcell ${stemcell_path} --fix
 
 # deploy new or os reload
 if [[ -e "deploy-yml/yml/$dname.yml" ]]; then
