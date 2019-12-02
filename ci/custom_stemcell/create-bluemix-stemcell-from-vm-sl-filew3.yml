@@ -117,9 +117,10 @@ resources:
   - name: bosh-linux-stemcell-builder
     type: git
     source:
-      uri: git@github.com:bluebosh/bosh-linux-stemcell-builder
+#      uri: git@github.com:bluebosh/bosh-linux-stemcell-builder
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
       branch: master
-      private_key: ((github_private_key.private_key))
+#      private_key: ((github_private_key.private_key))
 
   - name: stemcell-info
     type: s3
