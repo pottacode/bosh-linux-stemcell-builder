@@ -26,9 +26,8 @@ resources:
   - name: bosh-linux-stemcell-builder
     type: git
     source:
-      uri: git@github.com:bluebosh/bosh-linux-stemcell-builder
-      branch: custom_stemcell
-      private_key: {{github_private_key}}
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
+      branch: master
 
   - name: light-bluemix-stemcell
     type: s3
