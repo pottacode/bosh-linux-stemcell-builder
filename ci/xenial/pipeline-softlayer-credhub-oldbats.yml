@@ -15,6 +15,22 @@ shared:
       BOSH_SL_VM_DOMAIN:      ((softlayer-vm-domain))
       BOSH_SL_VM_NAME_PREFIX: ((softlayer-director-name-prefix))
 
+  - &prepare-bats-config
+    task: prepare-bats
+    file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/bats/prepare-bats-config.yml
+    params: &prepare-bats-params
+      BAT_VCAP_PASSWORD:      ((bat-vcap-password))
+      SL_DATACENTER:          ((softlayer-datacenter))
+      SL_VLAN_PRIVATE:        ((softlayer-vlan-private))
+      SL_VLAN_PUBLIC:         ((softlayer-vlan-public))
+      SL_VM_DOMAIN:           ((softlayer-vm-domain))
+      SL_VM_NAME_PREFIX:      ((softlayer-vm-name-prefix))
+      STEMCELL_NAME:          bosh-softlayer-xen-ubuntu-xenial-go_agent
+
+  - &run-bats
+    task: run-bats
+    file: bats/ci/tasks/run-bats.yml
+
   - &teardown
     task: teardown
     file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/bats/destroy-director.yml
@@ -140,32 +156,31 @@ jobs:
     plan:
     - do:
       - aggregate:
+        - get: bosh-release
         - get: stemcell
           trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-cli
         - get: bats
+        - get: bosh-deployment
+        - get: bosh-linux-stemcell-builder
         - get: bosh-linux-stemcell-builder-master
         - get: version
           passed: [create-softlayer-light-stemcell]
+      - {put: environment, params: {acquire: true}}
       - do:
-        - task: configure-bats
-          file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/configure-bats.yml
+        - <<: *deploy-director
+        - <<: *prepare-bats-config
           params:
-            BAT_PRIVATE_KEY: ((bat_private_key.private_key))
-            DIRECTOR_IP: ((director-ip-slcpi))
-            BOSH_USER_NAME: ((bosh-user-slcpi))
-            BOSH_PASSWORD: ((bosh-password-slcpi))
-            BOSH_CA: ((bosh_ca_cert_slcpi.private_key))
-            SL_DATACENTER: ((softlayer-datacenter))
-            SL_VLAN_PRIVATE: ((softlayer-vlan-private))
-            SL_VLAN_PUBLIC: ((softlayer-vlan-public))
-            SL_VM_DOMAIN: ((softlayer-vm-domain))
-            SL_VM_NAME_PREFIX: ((softlayer-vm-name-prefix))
-            STEMCELL_NAME: bosh-softlayer-xen-ubuntu-xenial-go_agent
-        - task: run-bats
-          file: bats/ci/tasks/run-bats.yml
+            <<: *prepare-bats-params
+        - <<: *run-bats
+        ensure:
+          do:
+          - <<: *teardown
+      ensure:
+        do:
+        - {put: environment, params: {release: environment}}
 
   - name: test-stemcells
     serial: true
@@ -344,6 +359,11 @@ resources:
       secret_access_key: ((stemcell-aws-secret-key))
       versioned_file: xenial/stemcell-info.json
 
+  - name: bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
   - name: bosh-deployment
     type: git
     source:
@@ -355,20 +375,14 @@ resources:
     source:
       access_key_id: ((stemcell-aws-access-key))
       bucket: bosh-softlayer-artifacts
-      regexp: bosh-cli-6.([0-9.]+)-softlayer-linux-amd64
+      regexp: bosh-cli-5.([0-9.]+)-softlayer-linux-amd64
       secret_access_key: ((stemcell-aws-secret-key))
-
-  # - name: bats
-  #   type: git
-  #   source:
-  #     uri: https://github.com/bluebosh/bosh-acceptance-tests.git
-  #     branch: gocli-bats
 
   - name: bats
     type: git
     source:
-      uri: https://github.com/gu-bin/bosh-acceptance-tests.git
-      branch: master
+      uri: https://github.com/bluebosh/bosh-acceptance-tests.git
+      branch: gocli-bats
 
   - name: environment
     type: pool
