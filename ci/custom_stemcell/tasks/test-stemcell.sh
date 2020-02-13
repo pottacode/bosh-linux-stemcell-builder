@@ -11,7 +11,11 @@ bosh2 -e ${ALIAS} upload-stemcell https://s3.us.cloud-object-storage.appdomain.c
 bosh2 -e ${ALIAS} upload-release http://${filew3_server}/releases/security-release/${RELEASE}/${RELEASE}-security-release.tgz
 
 if [ -e "deploy-yml/yml/custom-stemcell.yml" ]; then
-  bosh2 -e ${ALIAS} -d custom-stemcell deploy deploy-yml/yml/custom-stemcell.yml -n
+  bosh2 int deploy-yml/yml/custom-stemcell.yml \
+  -v stemcell_version=${stemcell_version} \
+  --var-errs \
+  > deploy-yml/yml/gen-custom-stemcell.yml
+  bosh2 -e ${ALIAS} -d custom-stemcell deploy deploy-yml/yml/gen-custom-stemcell.yml -n
 else
  echo "Deploy vm failed since the deployment yml file does not exist "
  exit 1
