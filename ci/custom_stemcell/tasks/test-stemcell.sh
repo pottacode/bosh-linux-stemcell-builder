@@ -7,7 +7,7 @@ stemcell_version=$(cat version/number | sed 's/\.0$//;s/\.0$//')
 stemcell_filename=light-bosh-stemcell-${stemcell_version}-${IAAS}-${HYPERVISOR}-${OS_NAME}-${OS_VERSION}-go_agent.tgz
 bosh2 -e ${ALIAS} deld -d custom-stemcell -n
 bosh2 -e ${ALIAS} delete-stemcell bosh-bluemix-xen-ubuntu-xenial-go_agent/${stemcell_version} -n
-bosh2 -e ${ALIAS} upload-stemcell https://s3.us.cloud-object-storage.appdomain.cloud/${bucket}/${stemcell_filename}
+bosh2 -e ${ALIAS} upload-stemcell https://${endpoint}/${bucket}/${stemcell_filename}
 bosh2 -e ${ALIAS} upload-release http://${filew3_server}/releases/security-release/${RELEASE}/${RELEASE}-security-release.tgz
 
 if [ -e "deploy-yml/yml/custom-stemcell.yml" ]; then
