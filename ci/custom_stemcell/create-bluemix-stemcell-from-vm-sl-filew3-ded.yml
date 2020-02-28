@@ -1,24 +1,36 @@
 ---
+groups:
+  - name: os_reload_ded
+    jobs:
+      - deploy-vm-ded
+  - name: create_stemcell_ded
+    jobs:
+      - customize-stemcell-version-ded
+      - capture-stemcell
+      - generate-light-stemcell
+      - test-stemcell
+      - promote-stemcell
+
 jobs:
-  # - name: deploy-vm-ded
-  #   serial: true
-  #   plan:
-  #     - aggregate:
-  #         - get: version
-  #         - get: bosh-linux-stemcell-builder-master
-  #     - task: deploy-vm
-  #       file: bosh-linux-stemcell-builder-master/ci/custom_stemcell/tasks/deploy-vm-ded.yml
-  #       params:
-  #         SL_API_KEY: ((softlayer-api-key-gubin))
-  #         SL_USERNAME:  ((softlayer-username-gubin))
-  #         VM_ID:  ((softlayer-vm-id-ded))
-  #         ENDPOINT: ((stemcell-sl-os-endpoint))
-  #         BUCKET: bluemix-custom-stemcell
+  - name: deploy-vm-ded
+    serial: true
+    plan:
+      - aggregate:
+          - get: version_org
+          - get: bosh-linux-stemcell-builder
+      - task: deploy-vm
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/deploy-vm-ded.yml
+        params:
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME:  ((softlayer-username-gubin))
+          VM_ID:  ((softlayer-vm-id-ded))
+          ENDPOINT: ((stemcell-sl-os-endpoint))
+          BUCKET: bluemix-custom-stemcell
 
   - name: customize-stemcell-version-ded
     plan:
       - get: bosh-linux-stemcell-builder
-      - get: version
+      - get: version_org
       - task: customize-stemcell-version-ded
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/customize-stemcell-version-ded.yml
       - put: version
@@ -122,10 +134,8 @@ resources:
   - name: bosh-linux-stemcell-builder
     type: git
     source:
-#      uri: git@github.com:bluebosh/bosh-linux-stemcell-builder
       uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
       branch: master
-#      private_key: ((github_private_key.private_key))
 
   - name: stemcell-info
     type: s3
@@ -135,6 +145,17 @@ resources:
       secret_access_key: ((stemcell-sl-os-secret-key))
       endpoint: ((stemcell-sl-os-endpoint))
       regexp: stemcell-info-(.*).json
+
+  - name: version_org
+    type: semver
+    source:
+      driver: s3
+      initial_version: ((stemcell_initial_version))
+      key: ((stemcell_version_key_dedorg))
+      bucket: ((candidate-custom-bluemix-stemcell-bucket))
+      access_key_id: ((stemcell-sl-os-access-key))
+      secret_access_key: ((stemcell-sl-os-secret-key))
+      endpoint: ((stemcell-sl-os-endpoint))
 
   - name: version
     type: semver
@@ -190,9 +211,3 @@ resources:
       uri: git@github.ibm.com:BlueMix-Fabric/bosh-cdl-private
       branch: master
       private_key: ((bluemix_private_key.private_key))
-
-  # - name: bosh-linux-stemcell-builder-master
-  #   type: git
-  #   source:
-  #     uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
-  #     branch: master

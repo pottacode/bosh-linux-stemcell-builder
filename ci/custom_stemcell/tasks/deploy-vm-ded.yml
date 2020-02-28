@@ -7,9 +7,9 @@ image_resource:
     repository: bluebosh/slcli_py
 
 inputs:
-  - name: version
-  - name: bosh-linux-stemcell-builder-master
-    path: bosh-linux-stemcell-builder
+  - name: version_org
+    path: version
+  - name: bosh-linux-stemcell-builder
 
 run:
   path: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/deploy-vm-ded.sh
