@@ -25,7 +25,8 @@ else
 fi
 
 # do os-reload
-wget -P stemcell https://${ENDPOINT}/${BUCKET}/light-bosh-stemcell-${VERSION}-bluemix-xen-ubuntu-xenial-go_agent.tgz
+#wget -P stemcell https://${ENDPOINT}/${BUCKET}/light-bosh-stemcell-${VERSION}-bluemix-xen-ubuntu-xenial-go_agent.tgz
+wget -P stemcell http://10.106.192.96/releases/light-bosh-stemcell/${VERSION}/light-bosh-stemcell-${VERSION}-bluemix-xen-ubuntu-xenial-go_agent.tgz
 tar zxf stemcell/*.tgz  -C ./
 image_id=`grep "virtual-disk-image-id:" stemcell.MF| cut -d ":" -f2 | sed 's/^[ \t]*//g' `
 sl_username=`echo $SL_USERNAME |sed 's/@/%40/g'`
