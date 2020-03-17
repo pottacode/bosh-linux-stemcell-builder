@@ -57,7 +57,7 @@ fi
 private_image_id=`slcli image list --name "Template created from imported bosh-stemcell-${custom_stemcell_version}-bluemix-esxi-ubuntu-trusty-go_agent.vhd" | tail -f | cut -d " " -f 1`
 echo "The image private id is " ${private_image_id}
 echo -e "Convert the private image ${private_image_id} to a public image"
-sleep 5
+sleep 120
 sl_username=`echo ${SL_USERNAME} |sed 's/@/%40/g'`
 
 curl -X POST -d "{
