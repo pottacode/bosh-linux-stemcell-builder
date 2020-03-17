@@ -1,13 +1,4 @@
 ---
-groups:
-  - name: all
-    jobs:
-      - customize-stemcell-version
-      - capture-stemcell
-      - generate-light-stemcell
-      - test-stemcell
-      - promote-stemcell
-
 jobs:
   - name: customize-stemcell-version
     plan:
@@ -19,11 +10,20 @@ jobs:
       - put: version
         params: {file: version/number}
 
+  # bump patch version, eg x.x.1 -> x.x.2
+  - name: self-bump-version
+    plan:
+      - get: version
+        params:
+          bump: patch
+      - put: version
+        params: {file: version/number}
+
   - name: capture-stemcell
     plan:
       - get: bosh-linux-stemcell-builder
       - get: version
-        trigger: true
+#        trigger: true
         passed: [customize-stemcell-version]
       - task: capture-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/capture-stemcell.yml
