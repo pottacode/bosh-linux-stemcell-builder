@@ -21,8 +21,8 @@ private_ip=`slcli vs detail --passwords ${stemcell_vm_id} | grep "private_ip" | 
 stemcell_version=`sshpass -p $root_pwd ssh -o StrictHostKeychecking=no root@$private_ip "cat /var/vcap/bosh/etc/stemcell_version"`
 echo "/var/vcap/bosh/etc/stemcell_version file on VM ${stemcell_vm_id} is $stemcell_version"
 
-private_image_name="private-image-backup-for-bosh-stemcell-${stemcell_version}"
-public_image_name="public-image-backup-for-bosh-stemcell-${stemcell_version}"
+private_image_name="backup-private-image-for-custom-bosh-stemcell-${stemcell_version}"
+public_image_name="backup-public-image-for-custom-bosh-stemcell-${stemcell_version}"
 
 echo -e "Capture the VM ${stemcell_vm_id} to a private image for backup"
 if [ `slcli image list | grep ${private_image_name} | wc -l` -gt 1 ]; then
@@ -33,7 +33,7 @@ fi
 if [ `slcli image list | grep ${private_image_name} | wc -l` -eq 1 ]; then
   echo -e "There is already 1 image with name ${private_image_name} exists. Use it directly..."
 else
-  echo -e "There is no image with name ${private_image_name} exists. Capture it..."
+  echo -e "There is no image with name ${private_image_name} exists. Capture private image from VM ${stemcell_vm_id}..."
   slcli vs capture -n ${private_image_name} ${stemcell_vm_id}
   if [ $? -ne 0 ]; then
     echo -e "The image capture failed, exiting..."
