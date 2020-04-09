@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bosh/agent
+    tag: latest
+
+inputs:
+  - name: boshagent-version
+  - name: bosh-linux-stemcell-builder-master
+outputs:
+  - name: boshagent-out
+run:
+  path: bosh-linux-stemcell-builder-master/ci/xenial/tasks/build-boshagent.sh

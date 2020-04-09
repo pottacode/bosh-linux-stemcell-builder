@@ -1,11 +1,21 @@
 ---
 jobs:
+  - name: notify-new-stemcell-version
+    plan:
+      - get: published-stemcell
+        trigger: true
+      - get: bosh-linux-stemcell-builder-master
+      - task: notify-new-cluster-version
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/notify-new-stemcell-version.yml
+        params:
+          SLACK_URL: ((slack_url))
+
   - name: new-boshagent-version
     plan:
       - get: published-stemcell
       - get: bosh-linux-stemcell-builder-master
       - task: make-version
-        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/make-boshagent-version.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/make-boshagent-version.yml
       - put: boshagent-version
         params:
           file: boshagent-version/number
@@ -18,7 +28,7 @@ jobs:
           - new-boshagent-version
       - get: bosh-linux-stemcell-builder-master
       - task: build-boshagent
-        file: bosh-linux-stemcell-builder-master/ci/softlayer/tasks/build-boshagent.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/build-boshagent.yml
         params:
           GITHUB_USER: ((github_user))
           GITHUB_PASSWORD: ((github_password))
