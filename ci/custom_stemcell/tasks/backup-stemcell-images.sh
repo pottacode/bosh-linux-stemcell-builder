@@ -112,3 +112,6 @@ if [ "${hvm_enabled}" != true ]; then
   echo -e "Enabling HVM mode on the stemcell ${public_image_id} failed"
   exit 1
 fi
+
+echo -e "All images for stemcell ${stemcell_version}"
+slcli image list --name *${stemcell_version}*
