@@ -18,7 +18,7 @@ if [ -e "deploy-yml/yml/custom-stemcell.yml" ]; then
   -v crowdstrike_version=${crowdstrike_version} \
   --var-errs \
   > deploy-yml/yml/gen-custom-stemcell.yml
-  bosh2 -e ${ALIAS} -d custom-stemcell deploy deploy-yml/yml/gen-custom-stemcell.yml -n
+  bosh2 -e ${ALIAS} -d custom-stemcell deploy deploy-yml/yml/gen-custom-stemcell.yml --no-redact -n
 else
  echo "Deploy vm failed since the deployment yml file does not exist "
  exit 1
