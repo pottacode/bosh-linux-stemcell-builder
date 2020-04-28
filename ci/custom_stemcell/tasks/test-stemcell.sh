@@ -15,6 +15,7 @@ if [ -e "deploy-yml/yml/custom-stemcell.yml" ]; then
   bosh2 int deploy-yml/yml/custom-stemcell.yml \
   -v stemcell_version=${stemcell_version} \
   -v SR_version=${RELEASE} \
+  -v crowdstrike_version=${crowdstrike_version} \
   --var-errs \
   > deploy-yml/yml/gen-custom-stemcell.yml
   bosh2 -e ${ALIAS} -d custom-stemcell deploy deploy-yml/yml/gen-custom-stemcell.yml -n
