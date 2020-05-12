@@ -51,8 +51,8 @@ bosh_agent_version=$(cat ${assets_dir}/bosh-agent-version)
 if is_ppc64le; then
   /usr/bin/meta4 file-download --metalink=${assets_dir}/metalink.meta4 --file=bosh-agent-${bosh_agent_version}-linux-ppc64le bosh-agent
 else
-  curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.268.15-sl-linux-amd64"
-  echo "862621d9a41abbf72d45bc98c0399109ce09ff02  bosh-agent" | shasum -c -
+  curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.268.16-sl-linux-amd64"
+  echo "070bda6a93cafd6667d44a68a2e11e360ba193af  bosh-agent" | shasum -c -
 fi
 
 mv bosh-agent $chroot/var/vcap/bosh/bin/
