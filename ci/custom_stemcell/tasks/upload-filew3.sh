@@ -10,7 +10,7 @@ export VERSION=$custom_version
 stemcell=$(realpath *stemcell/*.tgz)
 
 echo -e "Check if the stemcell ${VERSION} already exists on file.w3.ibm.com"
-curl http://master.file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}/ | grep "404 Not Found" 
+curl http://file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}/ | grep "404 Not Found"
 if [[ $? != 0 ]]; then
   echo -e "The stemcell ${VERSION} already exists at http://file.w3.bluemix.net/releases/light-bosh-stemcell/${VERSION}, exiting..."
   exit 1
