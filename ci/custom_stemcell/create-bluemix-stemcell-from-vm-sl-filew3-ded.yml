@@ -112,6 +112,7 @@ jobs:
           security_client_crt: ((security_client_crt.private_key))
           security_client_key: ((security_client_key.private_key))
           security_ca_pem: ((security_ca_pem.private_key))
+          crowdstrike_version: ((crowdstrike_version))
 
   - name: backup-stemcell
     plan:
