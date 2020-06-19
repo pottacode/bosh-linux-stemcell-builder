@@ -41,7 +41,7 @@ jobs:
     plan:
       - get: bosh-linux-stemcell-builder
       - get: version
-        trigger: true
+#        trigger: true
         passed: [customize-stemcell-version-ded]
       - task: capture-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/capture-stemcell.yml
