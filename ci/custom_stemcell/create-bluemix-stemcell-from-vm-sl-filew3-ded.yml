@@ -9,6 +9,7 @@ groups:
       - capture-stemcell
       - generate-light-stemcell
       - test-stemcell
+      - backup-stemcell
       - promote-stemcell
 
 jobs:
@@ -112,15 +113,34 @@ jobs:
           security_client_key: ((security_client_key.private_key))
           security_ca_pem: ((security_ca_pem.private_key))
 
+  - name: backup-stemcell
+    plan:
+      - aggregate:
+          - get: version
+#            trigger: true
+            passed: [test-stemcell]
+          - get: bosh-linux-stemcell-builder
+          - get: light-bluemix-stemcell
+            passed: [test-stemcell]
+      - task: backup-stemcell-images
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/backup-stemcell-images.yml
+        params:
+          stemcell_vm_id: ((softlayer-vm-id-ded))
+          SL_USERNAME: ((softlayer-username))
+          SL_API_KEY: ((softlayer-api-key))
+          sl_para_id: ((sl_para_id))
+          longName: ((longName))
+          sl_para_name: ((sl_para_name))
+
   - name: promote-stemcell
     plan:
       - aggregate:
         - get: bosh-linux-stemcell-builder
         - get: light-bluemix-stemcell
 #          trigger: true
-          passed: [test-stemcell]
+          passed: [backup-stemcell]
         - get: version
-          passed: [test-stemcell]
+          passed: [backup-stemcell]
       - task: promote-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/publish.yml
         params:
