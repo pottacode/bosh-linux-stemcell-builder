@@ -13,10 +13,7 @@ else
   fallback=grub
 fi
 
-if is_ppc64le; then
-  # ppc64le uses grub2
-  pkg_mgr install grub2
-elif pkg_exists $preferred; then
+if pkg_exists $preferred; then
   pkg_mgr install $preferred
 elif pkg_exists $fallback; then
   pkg_mgr install $fallback
@@ -25,20 +22,15 @@ else
   exit 2
 fi
 
-if [ -d $chroot/usr/lib/grub/powerpc* ] # GRUB on ppc64le
-then
-
-  rsync -a $chroot/usr/lib/grub/powerpc*/ $chroot/boot/grub/
-
-elif [ -d $chroot/usr/lib/grub/x86* ] # classic GRUB on Ubuntu
+if [ -d $chroot/usr/lib/grub/x86* ] # classic GRUB on Ubuntu
 then
 
   rsync -a $chroot/usr/lib/grub/x86*/ $chroot/boot/grub/
 
-elif [ -d $chroot/etc/grub.d ] # GRUB 2 on CentOS 7 or Ubuntu
+elif [ -d $chroot/usr/lib/grub/i386* ] # grub-pc on bionic
 then
 
-  echo "Found grub2; grub-legacy bootloader stages not needed"
+  rsync -a $chroot/usr/lib/grub/i386*/ $chroot/boot/grub/
 
 else
 

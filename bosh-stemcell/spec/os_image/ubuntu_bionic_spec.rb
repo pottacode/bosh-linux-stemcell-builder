@@ -36,23 +36,9 @@ describe 'Ubuntu 18.04 OS image', os_image: true do
 
   describe 'base_apt' do
     describe file('/etc/apt/sources.list') do
-      if Bosh::Stemcell::Arch.ppc64le?
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic main restricted' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-updates main restricted' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic universe' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-updates universe' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic multiverse' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-updates multiverse' }
-
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-security main restricted' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-security universe' }
-        its(:content) { should match 'deb http://ports.ubuntu.com/ubuntu-ports/ bionic-security multiverse' }
-
-      else
-        its(:content) { should match 'deb http://archive.ubuntu.com/ubuntu bionic main universe multiverse' }
-        its(:content) { should match 'deb http://archive.ubuntu.com/ubuntu bionic-updates main universe multiverse' }
-        its(:content) { should match 'deb http://security.ubuntu.com/ubuntu bionic-security main universe multiverse' }
-      end
+      its(:content) { should match 'deb http://archive.ubuntu.com/ubuntu bionic main universe multiverse' }
+      its(:content) { should match 'deb http://archive.ubuntu.com/ubuntu bionic-updates main universe multiverse' }
+      its(:content) { should match 'deb http://security.ubuntu.com/ubuntu bionic-security main universe multiverse' }
     end
 
     describe file('/lib/systemd/system/runit.service') do
@@ -199,8 +185,8 @@ EOF
     end
 
     describe file('/etc/pam.d/common-auth') do
-      it'must restrict a user account after 5 failed login attempts (stig: V-38573)' do
-        expect(subject.content).to match /auth.*pam_tally2\.so.*deny=5/
+      it'must restrict a user account after 3 failed login attempts (stig: V-38573)' do
+        expect(subject.content).to match /auth.*pam_tally2\.so.*deny=3/
       end
     end
   end
@@ -364,7 +350,7 @@ systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd/resolve:/usr/sbin/nol
 syslog:x:102:106::/home/syslog:/usr/sbin/nologin
 messagebus:x:103:107::/nonexistent:/usr/sbin/nologin
 _apt:x:104:65534::/nonexistent:/usr/sbin/nologin
-_chrony:x:105:108:Chrony daemon,,,:/var/lib/chrony:/usr/sbin/nologin
+_chrony:x:105:109:Chrony daemon,,,:/var/lib/chrony:/usr/sbin/nologin
 sshd:x:106:65534::/run/sshd:/usr/sbin/nologin
 vcap:x:1000:1000:BOSH System User:/home/vcap:/bin/bash
 HERE
@@ -451,8 +437,9 @@ input:x:104:
 crontab:x:105:
 syslog:x:106:
 messagebus:x:107:
-_chrony:x:108:
-ssh:x:109:
+netdev:x:108:
+_chrony:x:109:
+ssh:x:110:
 admin:x:999:vcap
 vcap:x:1000:syslog
 bosh_sshers:x:1001:vcap
@@ -508,6 +495,7 @@ input:!::
 crontab:!::
 syslog:!::
 messagebus:!::
+netdev:!::
 _chrony:!::
 ssh:!::
 admin:!::vcap
