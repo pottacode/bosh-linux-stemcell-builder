@@ -1,0 +1,369 @@
+---
+jobs:
+  - name: test-unit
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - get: bosh-linux-stemcell-builder-master
+      - task: test-unit
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-unit.yml
+
+  - name: new-stemcell-version
+    plan:
+      - get: published-stemcell
+      - get: bosh-linux-stemcell-builder-master
+      - task: make-version
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/make-stemcell-version.yml
+      - put: version
+        params:
+          file: version/number
+
+  - name: build-softlayer-xen-ubuntu-bionic
+    plan:
+      - aggregate:
+          - get: version
+            passed:
+            - new-stemcell-version
+#            trigger: true
+          - get: bosh-linux-stemcell-builder
+          - get: bosh-linux-stemcell-builder-master
+      - task: create-stemcell
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/build-softlayer.yml
+        privileged: true
+        params:
+          IAAS:         softlayer
+          HYPERVISOR:   xen
+          OS_NAME:      ubuntu
+          OS_VERSION:   bionic
+      - aggregate:
+        - put: softlayer-xen-ubuntu-bionic
+          params:
+            file: stemcell/*.tgz
+
+  - name: convert-softlayer-stemcell
+    plan:
+      - aggregate:
+          - get: version
+            passed: [build-softlayer-xen-ubuntu-bionic]
+          - get: softlayer-xen-ubuntu-bionic
+            trigger: true
+            passed: [build-softlayer-xen-ubuntu-bionic]
+          - get: bosh-linux-stemcell-builder-master
+      - task: convert-stemcell
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/convert-stemcell.yml
+        params:
+          IAAS:         softlayer
+          HYPERVISOR:   xen
+          OS_NAME:      ubuntu
+          OS_VERSION:   bionic
+          ACCESS_KEY_ID: ((stemcell-sl-os-access-key-matt))
+          SECRET_ACCESS_KEY: ((stemcell-sl-os-secret-key-matt))
+          ENDPOINT: ((stemcell-sl-os-endpoint-matt))
+          BUCKET: ((stemcell-transit-bucket))
+        input_mapping:
+          stemcell: softlayer-xen-ubuntu-bionic
+
+  - name: import-softlayer-stemcell
+    plan:
+      - get: version
+        trigger: true
+        passed: [convert-softlayer-stemcell]
+      - get: bosh-linux-stemcell-builder-master
+      - task: import-stemcell-image
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/import-stemcell-bionic.yml
+        params:
+          IAAS: softlayer
+          HYPERVISOR: xen
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          BUCKET: ((stemcell-transit-bucket))
+          REGION: ((stemcell-sl-os-region))
+          COS_SERVICE_ID_KEY: ((cos-service-id-key))
+          sl_para_id: ((sl_para_id))
+          longName: ((longName))
+          sl_para_name: ((sl_para_name))
+      - put: stemcell-info
+        params: {file: stemcell-image/stemcell-info.json}
+
+  - name: create-softlayer-light-stemcell
+    plan:
+      - aggregate:
+        - get: softlayer-xen-ubuntu-bionic
+        - get: stemcell-info
+          trigger: true
+          passed: [import-softlayer-stemcell]
+        - get: version
+          trigger: true
+          passed: [import-softlayer-stemcell]
+        - get: bosh-linux-stemcell-builder-master
+      - task: create-light-stemcell
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/create-light-stemcell.yml
+        params:
+          HYPERVISOR: xen
+          IAAS: softlayer
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          STEMCELL_FORMATS: softlayer-light
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          DATACENTER: ((sl_para_name))
+        input_mapping:
+          stemcell: softlayer-xen-ubuntu-bionic
+      - put: light-softlayer-stemcell
+        params: {file: light-stemcell/*.tgz}
+
+  - name: bats-ubuntu
+    serial: true
+    plan:
+    - do:
+      - aggregate:
+        - get: stemcell
+          trigger: true
+          resource: light-softlayer-stemcell
+          passed: [create-softlayer-light-stemcell]
+        - get: bosh-cli
+        - get: bats
+        - get: bosh-linux-stemcell-builder-master
+        - get: version
+          passed: [create-softlayer-light-stemcell]
+      - do:
+        - task: configure-bats
+          file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/configure-bats.yml
+          params:
+            BAT_PRIVATE_KEY: ((bat_private_key.private_key))
+            DIRECTOR_IP: ((director-ip-slcpi))
+            BOSH_USER_NAME: ((bosh-user-slcpi))
+            BOSH_PASSWORD: ((bosh-password-slcpi))
+            BOSH_CA: ((bosh_ca_cert_slcpi.private_key))
+            SL_DATACENTER: ((softlayer-datacenter))
+            SL_VLAN_PRIVATE: ((softlayer-vlan-private))
+            SL_VLAN_PUBLIC: ((softlayer-vlan-public))
+            SL_VM_DOMAIN: ((softlayer-vm-domain))
+            SL_VM_NAME_PREFIX: ((softlayer-vm-name-prefix))
+            STEMCELL_NAME: bosh-softlayer-xen-ubuntu-bionic-go_agent
+        - task: run-bats
+          file: bats/ci/tasks/run-bats.yml
+
+  # test userdata cache
+  - name: test-userdata-cache
+    serial: true
+    plan:
+      - aggregate:
+        - get: version
+          trigger: true
+          passed: [create-softlayer-light-stemcell]
+        - get: pipeline-image
+        - get: stemcell
+          trigger: true
+          resource: light-softlayer-stemcell
+          passed: [create-softlayer-light-stemcell]
+        - get: bosh-linux-stemcell-builder-master
+        - get: deploy-yml
+      - task: test-userdata-cache
+        image: pipeline-image
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-userdata-cache.yml
+        params:
+          ALIAS: ((alias_slcpi))
+          CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
+
+  # test portable ip
+  - name: test-portable-ip
+    serial: true
+    plan:
+      - aggregate:
+        - get: version
+        - get: pipeline-image
+        - get: stemcell
+          trigger: true
+          resource: light-softlayer-stemcell
+          passed: [create-softlayer-light-stemcell]
+        - get: bosh-linux-stemcell-builder-master
+        - get: deploy-yml
+      - task: test-portable-ip
+        image: pipeline-image
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-portable-ip.yml
+        params:
+          ALIAS: ((alias_slcpi))
+          CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
+          PORTABLE_IP: ((portable_ip))
+
+  - name: promote-stemcells-s3
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+            passed:
+              - bats-ubuntu
+          - get: bosh-linux-stemcell-builder-master
+          - get: bosh-linux-stemcell-builder
+          - get: stemcell
+            passed:
+              - bats-ubuntu
+            trigger: true
+            resource: light-softlayer-stemcell
+      - task: copy-artifacts
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/copy-artifacts.yml
+        params:
+          AWS_ACCESS_KEY_ID: ((stemcell-aws-access-key))
+          AWS_SECRET_ACCESS_KEY: ((stemcell-aws-secret-key))
+          CANDIDATE_BUCKET_NAME: ((candidate-softlayer-stemcell-bucket))
+      - put: light-softlayer-stemcell-prod
+        params:
+          file: light-softlayer-stemcell-prod/*.tgz
+          acl: public-read
+      - put: bosh-linux-stemcell-builder
+        params:
+          only_tag: true
+          repository: bosh-linux-stemcell-builder
+          tag: version-tag/tag
+
+  - name: deploy-vm
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+            passed:
+              - promote-stemcells-s3
+          - get: stemcell
+            passed:
+              - promote-stemcells-s3
+            resource: light-softlayer-stemcell-prod
+          - get: bosh-linux-stemcell-builder-master
+          - get: stemcells-index
+      - task: deploy-vm
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/deploy-vm.yml
+        params:
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          PUBLISHED_BUCKET_NAME: bosh-softlayer-cpi-stemcells
+          SL_API_KEY: ((softlayer-api-key))
+          SL_USERNAME:  ((softlayer-username))
+          VM_ID:  ((softlayer-vm-id))
+
+  - name: publish-stemcells-boshio
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+            passed:
+              - promote-stemcells-s3
+          - get: stemcell
+            passed:
+              - promote-stemcells-s3
+            resource: light-softlayer-stemcell-prod
+          - get: bosh-linux-stemcell-builder-master
+          - get: stemcells-index
+      - task: post-stemcell
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/publish-stemcells-boshio.yml
+        params:
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          PUBLISHED_BUCKET_NAME: bosh-softlayer-cpi-stemcells
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+
+resources:
+  - name: bosh-linux-stemcell-builder-master
+    type: git
+    source:
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
+      branch: master
+
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: git@github.com:bluebosh/bosh-linux-stemcell-builder
+      branch: community-bionic
+      private_key: ((github_private_key.private_key))
+
+  - name: version
+    type: semver
+    source:
+      driver: s3
+      initial_version: ((stemcell_initial_version))
+      key: ((stemcell_version_key))
+      bucket: ((candidate-stemcell-bucket))
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+
+  - name: stemcell-info
+    type: s3
+    source:
+      bucket: ((candidate-stemcell-bucket))
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+      versioned_file: bionic/stemcell-info.json
+
+  - name: bosh-cli
+    type: s3
+    source:
+      access_key_id: ((stemcell-aws-access-key))
+      bucket: bosh-softlayer-artifacts
+      regexp: bosh-cli-6.([0-9.]+)-softlayer-linux-amd64
+      secret_access_key: ((stemcell-aws-secret-key))
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/gu-bin/bosh-acceptance-tests.git
+      branch: master
+
+   #
+   # Stemcells
+   #
+
+  - name: softlayer-xen-ubuntu-bionic
+    type: s3
+    source:
+      bucket: bosh-softlayer-stemcells-candidate-container
+      regexp: bosh-stemcell-(.+)-softlayer-esxi-ubuntu-bionic-go_agent.tgz
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+
+  - name: light-softlayer-stemcell
+    type: s3
+    source:
+      bucket: bosh-softlayer-stemcells-candidate-container
+      regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-bionic-go_agent.tgz
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+
+  - name: published-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-vsphere-esxi-ubuntu-bionic-go_agent
+      tarball: false
+
+  - name: stemcells-index
+    type: git
+    source:
+      uri: git@github.com:bosh-io/stemcells-softlayer-index.git
+      branch: master
+      private_key: ((boshio_private_key.private_key))
+
+  - name: light-softlayer-stemcell-prod
+    type: s3
+    source:
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+      bucket: bosh-softlayer-cpi-stemcells
+      regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-bionic-go_agent.tgz
+
+  - name: pipeline-image
+    source:
+      password: ((private-registry-docker-password-read-only))
+      repository: registry.eu-gb.bluemix.net/concourse/ci-bluemix-pipelines
+      tag: latest
+      username: token
+    type: docker-image
+
+  - name: deploy-yml
+    type: git
+    source:
+      uri: git@github.ibm.com:BlueMix-Fabric/bosh-cdl-private
+      branch: master
+      private_key: ((bluemix_private_key.private_key))
