@@ -1,5 +1,11 @@
-dmsetup
-kpartx
+busybox-initramfs
+initramfs-tools
+initramfs-tools-core
+libibverbs1:amd64
+libnl-route-3-200:amd64
+librados2
+liburcu6:amd64
 multipath-tools
-open-iscsi
 sg3-utils-udev
+libisns0:amd64
+open-iscsi

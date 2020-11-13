@@ -113,7 +113,7 @@ namespace :stemcell do
         args.os_image_path,
       )
 
-      sh(environment.os_image_rspec_command)
+#      sh(environment.os_image_rspec_command)
 
       puts "Working from #{environment.work_path}..."
       puts "########################################"
