@@ -100,7 +100,7 @@ jobs:
           passed: [import-softlayer-stemcell]
         - get: bosh-linux-stemcell-builder-master
       - task: create-light-stemcell
-        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/create-light-stemcell.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/create-light-stemcell-bionic.yml
         params:
           HYPERVISOR: xen
           IAAS: softlayer
@@ -164,7 +164,7 @@ jobs:
         - get: deploy-yml
       - task: test-userdata-cache
         image: pipeline-image
-        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-userdata-cache.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-userdata-cache-bionic.yml
         params:
           ALIAS: ((alias_slcpi))
           CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
@@ -184,7 +184,7 @@ jobs:
         - get: deploy-yml
       - task: test-portable-ip
         image: pipeline-image
-        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-portable-ip.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/test-portable-ip-bionic.yml
         params:
           ALIAS: ((alias_slcpi))
           CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
