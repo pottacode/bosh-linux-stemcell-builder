@@ -47,7 +47,7 @@ jobs:
           - get: version
             passed: [build-softlayer-xen-ubuntu-bionic]
           - get: softlayer-xen-ubuntu-bionic
-            trigger: true
+#            trigger: true
             passed: [build-softlayer-xen-ubuntu-bionic]
           - get: bosh-linux-stemcell-builder-master
       - task: convert-stemcell
@@ -67,7 +67,7 @@ jobs:
   - name: import-softlayer-stemcell
     plan:
       - get: version
-        trigger: true
+#        trigger: true
         passed: [convert-softlayer-stemcell]
       - get: bosh-linux-stemcell-builder-master
       - task: import-stemcell-image
@@ -93,10 +93,10 @@ jobs:
       - aggregate:
         - get: softlayer-xen-ubuntu-bionic
         - get: stemcell-info
-          trigger: true
+#          trigger: true
           passed: [import-softlayer-stemcell]
         - get: version
-          trigger: true
+#          trigger: true
           passed: [import-softlayer-stemcell]
         - get: bosh-linux-stemcell-builder-master
       - task: create-light-stemcell
@@ -121,7 +121,7 @@ jobs:
     - do:
       - aggregate:
         - get: stemcell
-          trigger: true
+#          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-cli
@@ -153,11 +153,11 @@ jobs:
     plan:
       - aggregate:
         - get: version
-          trigger: true
+#          trigger: true
           passed: [create-softlayer-light-stemcell]
         - get: pipeline-image
         - get: stemcell
-          trigger: true
+#          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-linux-stemcell-builder-master
@@ -177,7 +177,7 @@ jobs:
         - get: version
         - get: pipeline-image
         - get: stemcell
-          trigger: true
+#          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-linux-stemcell-builder-master
@@ -202,7 +202,7 @@ jobs:
           - get: stemcell
             passed:
               - bats-ubuntu
-            trigger: true
+#            trigger: true
             resource: light-softlayer-stemcell
       - task: copy-artifacts
         file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/copy-artifacts.yml
