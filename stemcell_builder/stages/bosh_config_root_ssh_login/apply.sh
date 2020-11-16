@@ -13,3 +13,9 @@ echo 'PermitRootLogin yes' >> $chroot/etc/ssh/sshd_config
 sed "/^ *AllowGroups/d" -i $chroot/etc/ssh/sshd_config
 
 sed "/^ *DenyUsers/d" -i $chroot/etc/ssh/sshd_config
+
+sed "/^ *UsePrivilegeSeparation/d" -i $chroot/etc/ssh/sshd_config
+echo 'UsePrivilegeSeparation yes' >> $chroot/etc/ssh/sshd_config
+
+sed "/^ *ChallengeResponseAuthentication/d" -i $chroot/etc/ssh/sshd_config
+echo 'ChallengeResponseAuthentication yes' >> $chroot/etc/ssh/sshd_config
