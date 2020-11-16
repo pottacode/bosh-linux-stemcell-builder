@@ -188,7 +188,7 @@ jobs:
         params:
           ALIAS: ((alias_slcpi))
           CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
-          PORTABLE_IP: ((portable_ip))
+          PORTABLE_IP: ((portable_ip_bionic))
 
   - name: promote-stemcells-s3
     serial: true
