@@ -444,7 +444,6 @@ admin:x:999:vcap
 vcap:x:1000:syslog
 bosh_sshers:x:1001:vcap
 bosh_sudoers:x:1002:
-rdma:x:111:
 HERE
     end
 
@@ -503,7 +502,6 @@ admin:!::vcap
 vcap:!::syslog
 bosh_sshers:!::vcap
 bosh_sudoers:!::
-rdma:!::
 HERE
     end
   end
