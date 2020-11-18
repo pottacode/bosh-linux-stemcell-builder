@@ -225,7 +225,7 @@ shared_examples_for 'every OS image' do
       expect(matches).to contain_exactly('HostKey /etc/ssh/ssh_host_rsa_key', 'HostKey /etc/ssh/ssh_host_ecdsa_key', 'HostKey /etc/ssh/ssh_host_ed25519_key')
     end
 
-    it 'disallows X11 forwarding' do
+    it 'disallows X11 forwarding', exclude_on_softlayer: true do
       expect(sshd_config.content).to match(/^X11Forwarding no$/)
       expect(sshd_config.content).to_not match(/^X11DisplayOffset/)
     end
