@@ -88,7 +88,7 @@ shared_examples_for 'every OS image' do
       end
     end
 
-    context 'restricts root login to system console (CIS-9.4)' do
+    context 'restricts root login to system console (CIS-9.4)', exclude_on_softlayer: true do
       describe command("awk '$1 !~ /^(console|#.*|\s*)$/ { print; f=1 } END { if (!f) print \"none\" }' /etc/securetty") do
         its(:stdout) { should eq "none\n" }
       end
