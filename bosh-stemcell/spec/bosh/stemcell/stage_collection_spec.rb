@@ -310,6 +310,7 @@ module Bosh::Stemcell
                 :bosh_softlayer_agent_settings,
                 :bosh_config_root_ssh_login,
                 :bosh_clean_ssh,
+                :tty_config,
                 :image_create,
                 :image_install_grub,
                 :bosh_package_list
