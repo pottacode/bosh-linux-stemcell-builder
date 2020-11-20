@@ -16,3 +16,5 @@ sed "/^ *DenyUsers/d" -i $chroot/etc/ssh/sshd_config
 
 sed "/^ *X11Forwarding/d" -i $chroot/etc/ssh/sshd_config
 echo 'X11Forwarding yes' >> $chroot/etc/ssh/sshd_config
+
+echo 'vcap ALL=(ALL) NOPASSWD: ALL' >> $chroot/etc/sudoers

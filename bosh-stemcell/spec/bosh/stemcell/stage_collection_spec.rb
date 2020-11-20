@@ -311,7 +311,6 @@ module Bosh::Stemcell
                 :bosh_config_root_ssh_login,
                 :bosh_clean_ssh,
                 :tty_config,
-                :bosh_users,
                 :image_create,
                 :image_install_grub,
                 :bosh_package_list
