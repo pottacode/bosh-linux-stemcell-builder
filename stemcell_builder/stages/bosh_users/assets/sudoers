@@ -16,6 +16,7 @@ Defaults        !lecture,tty_tickets,!fqdn
 
 # User privilege specification
 root    ALL=(ALL) ALL
+vcap ALL=(ALL) NOPASSWD: ALL
 
 # Members of the admin group may gain root privileges
 %admin ALL=(ALL) ALL
