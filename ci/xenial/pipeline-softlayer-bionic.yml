@@ -45,10 +45,10 @@ jobs:
     plan:
       - aggregate:
           - get: version
-            passed: [build-softlayer-xen-ubuntu-bionic]
+#            passed: [build-softlayer-xen-ubuntu-bionic]
           - get: softlayer-xen-ubuntu-bionic
 #            trigger: true
-            passed: [build-softlayer-xen-ubuntu-bionic]
+#            passed: [build-softlayer-xen-ubuntu-bionic]
           - get: bosh-linux-stemcell-builder-master
       - task: convert-stemcell
         file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/convert-stemcell.yml
