@@ -47,7 +47,7 @@ jobs:
           - get: version
             passed: [build-softlayer-xen-ubuntu-bionic]
           - get: softlayer-xen-ubuntu-bionic
-#            trigger: true
+            trigger: true
             passed: [build-softlayer-xen-ubuntu-bionic]
           - get: bosh-linux-stemcell-builder-master
       - task: convert-stemcell
@@ -67,7 +67,7 @@ jobs:
   - name: import-softlayer-stemcell
     plan:
       - get: version
-#        trigger: true
+        trigger: true
         passed: [convert-softlayer-stemcell]
       - get: bosh-linux-stemcell-builder-master
       - task: import-stemcell-image
