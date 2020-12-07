@@ -10,12 +10,12 @@ describe 'Ubuntu 18.04 stemcell image', stemcell_image: true do
       it { should be_file }
       its(:content) { should match 'set default="0"' }
       its(:content) { should match(/^set root=\(hd0,2\)$/) }
-      its(:content) { should match %r{linux\t/boot/vmlinuz-\S+-generic root=UUID=\S* ro } }
+      its(:content) { should match %r{linux\t/vmlinuz-\S+-generic root=UUID=\S* ro } }
       its(:content) { should match ' selinux=0' }
       its(:content) { should match ' cgroup_enable=memory swapaccount=1' }
       its(:content) { should match ' console=ttyS0,115200n8' }
       its(:content) { should match ' earlyprintk=ttyS0 rootdelay=300' }
-      its(:content) { should match %r{initrd\t/boot/initrd.img-\S+-generic} }
+      its(:content) { should match %r{initrd\t/initrd.img-\S+-generic} }
 
       it('should set the grub menu password (stig: V-38585)') { expect(subject.content).to match /password_pbkdf2 vcap/ }
       it('should be of mode 600 (stig: V-38583)') { expect(subject).to be_mode(0600) }

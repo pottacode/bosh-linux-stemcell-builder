@@ -15,3 +15,5 @@ run_in_chroot $chroot "
 service multipath-tools restart
 "
 
+# Install netplan.io
+pkg_mgr install netplan.io

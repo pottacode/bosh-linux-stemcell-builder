@@ -23,11 +23,11 @@ fi
 if [[ "${DISTRIB_CODENAME}" == 'bionic' ]]; then
   debs="$debs gpg-agent libcurl4 libcurl4-openssl-dev resolvconf net-tools ifupdown"
 
-  pkg_mgr purge netplan.io
-  run_in_chroot $chroot "
-    rm -rf /usr/share/netplan
-    rm -rf /etc/netplan
-  "
+#  pkg_mgr purge netplan.io
+#  run_in_chroot $chroot "
+#    rm -rf /usr/share/netplan
+#    rm -rf /etc/netplan
+#  "
 
   cp "$(dirname "$0")/assets/systemd-networkd-resolvconf-update.path" "${chroot}/lib/systemd/system/"
   cp "$(dirname "$0")/assets/systemd-networkd-resolvconf-update.service" "${chroot}/lib/systemd/system/"

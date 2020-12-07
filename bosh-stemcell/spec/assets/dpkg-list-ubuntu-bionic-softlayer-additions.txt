@@ -9,3 +9,6 @@ multipath-tools
 sg3-utils-udev
 libisns0:amd64
 open-iscsi
+libnetplan0:amd64
+netplan.io
+python3-netifaces
