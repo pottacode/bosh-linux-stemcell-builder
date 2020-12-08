@@ -35,7 +35,7 @@ fi
 echo "#ifconfig of the new deployed vm:"
 bosh2 -e ${ALIAS} -d ${dname} ssh -c "sudo ifconfig" | awk -F '|' '{print $2}'
 
-portable_ip_vm=$(bosh2 -e ${ALIAS} -d ${dname} ssh -c "sudo ifconfig" | awk -F '|' '{print $2}' | grep 'eth0:' -A 1 | grep 'inet addr:'| cut -d: -f2 | awk '{print $1}')
+portable_ip_vm=$(bosh2 -e ${ALIAS} -d ${dname} ssh -c "sudo ifconfig" | awk -F '|' '{print $2}' | grep 'eth0:[0-9]:' -A 1 | grep 'inet' | awk '{print $2}')
 echo "The new vm portable ip is -" ${portable_ip_vm}
 
 if [[ ${portable_ip_vm} == ${PORTABLE_IP} ]]; then
