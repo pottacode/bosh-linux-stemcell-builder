@@ -47,8 +47,8 @@ wget -O /usr/bin/meta4 https://github.com/dpb587/metalink/releases/download/v0.2
   && chmod +x /usr/bin/meta4
 
 bosh_agent_version=$(cat ${assets_dir}/bosh-agent-version)
-curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.333.0-new1-sl-linux-amd64"
-echo "33c883a724a8ff5cbcf4cd614c3d2d4ebcf1f35a  bosh-agent" | shasum -c -
+curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.333.0-new2-sl-linux-amd64"
+echo "db21b473ae3cf2d396762cd89a5a7381e3df7286  bosh-agent" | shasum -c -
 
 mv bosh-agent $chroot/var/vcap/bosh/bin/
 
