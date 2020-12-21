@@ -205,7 +205,7 @@ jobs:
 #            trigger: true
             resource: light-softlayer-stemcell
       - task: copy-artifacts
-        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/copy-artifacts.yml
+        file: bosh-linux-stemcell-builder-master/ci/xenial/tasks/copy-artifacts-bionic.yml
         params:
           AWS_ACCESS_KEY_ID: ((stemcell-aws-access-key))
           AWS_SECRET_ACCESS_KEY: ((stemcell-aws-secret-key))
