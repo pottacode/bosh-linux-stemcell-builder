@@ -23,9 +23,9 @@ jobs:
     plan:
       - aggregate:
           - get: version
-#            passed:
-#            - new-stemcell-version
-#            trigger: true
+            passed:
+            - new-stemcell-version
+            trigger: true
           - get: bosh-linux-stemcell-builder
           - get: bosh-linux-stemcell-builder-master
       - task: create-stemcell
@@ -93,10 +93,10 @@ jobs:
       - aggregate:
         - get: softlayer-xen-ubuntu-bionic
         - get: stemcell-info
-#          trigger: true
+          trigger: true
           passed: [import-softlayer-stemcell]
         - get: version
-#          trigger: true
+          trigger: true
           passed: [import-softlayer-stemcell]
         - get: bosh-linux-stemcell-builder-master
       - task: create-light-stemcell
@@ -121,7 +121,7 @@ jobs:
     - do:
       - aggregate:
         - get: stemcell
-#          trigger: true
+          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-cli
@@ -153,11 +153,11 @@ jobs:
     plan:
       - aggregate:
         - get: version
-#          trigger: true
+          trigger: true
           passed: [create-softlayer-light-stemcell]
         - get: pipeline-image
         - get: stemcell
-#          trigger: true
+          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-linux-stemcell-builder-master
@@ -177,7 +177,7 @@ jobs:
         - get: version
         - get: pipeline-image
         - get: stemcell
-#          trigger: true
+          trigger: true
           resource: light-softlayer-stemcell
           passed: [create-softlayer-light-stemcell]
         - get: bosh-linux-stemcell-builder-master
