@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bluebosh/slcli_py
+
+inputs:
+  - name: bosh-linux-stemcell-builder
+  - name: light-bluemix-stemcell
+  - name: version
+outputs:
+  - name: bluemix-stemcell
+
+run:
+  path: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/publish-bionic.sh
+
+

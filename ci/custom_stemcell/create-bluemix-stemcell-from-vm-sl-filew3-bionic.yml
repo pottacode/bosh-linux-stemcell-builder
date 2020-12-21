@@ -1,0 +1,205 @@
+---
+jobs:
+  - name: customize-stemcell-version
+    plan:
+      - get: bosh-linux-stemcell-builder
+      - get: stemcell
+        resource: light-softlayer-stemcell-prod
+      - task: customize-stemcell-version
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/customize-stemcell-version.yml
+      - put: version
+        params: {file: version/number}
+
+  # bump patch version, eg x.x.1 -> x.x.2
+  - name: self-bump-version
+    plan:
+      - get: version
+        params:
+          bump: patch
+      - put: version
+        params: {file: version/number}
+
+  - name: capture-stemcell
+    plan:
+      - get: bosh-linux-stemcell-builder
+      - get: version
+#        trigger: true
+#        passed: [customize-stemcell-version]
+      - task: capture-stemcell
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/capture-stemcell-bionic.yml
+        params:
+          stemcell_vm_id: ((softlayer-vm-id-bionic))
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          sl_para_id: ((sl_para_id))
+          longName: ((longName))
+          sl_para_name: ((sl_para_name))
+      - put: stemcell-info
+        params: 
+          file: stemcell-image/stemcell-info-*.json
+          acl: public-read
+
+  - name: generate-light-stemcell
+    plan:
+      - aggregate:
+        - get: bosh-linux-stemcell-builder
+        - get: stemcell
+          resource: light-softlayer-stemcell-prod
+        - get: stemcell-info
+          passed: [capture-stemcell]        
+        - get: version
+          passed: [capture-stemcell]
+#          trigger: true
+      - task: generate-light-stemcell
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/generate-light-stemcell-bionic.yml
+        params:
+          stemcell_vm_id: ((softlayer-vm-id-bionic))
+          HYPERVISOR: xen
+          IAAS: bluemix
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+      - put: light-bluemix-stemcell
+        params: 
+          file: light-stemcell/*.tgz
+          acl: public-read
+
+  - name: test-stemcell
+    serial: true
+    plan:
+      - aggregate:
+        - get: version
+#          trigger: true
+          passed: [generate-light-stemcell]
+        - get: bosh-linux-stemcell-builder
+        - get: pipeline-image
+        - get: deploy-yml
+        - get: light-bluemix-stemcell
+          passed: [generate-light-stemcell]
+      - task: test-stemcell
+        image: pipeline-image
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/test-stemcell-bionic.yml
+        params:
+          HYPERVISOR: xen
+          IAAS: bluemix
+          OS_NAME: ubuntu
+          OS_VERSION: bionic
+          RELEASE: ((security-release))
+          ALIAS: ((alias_slcpi))
+          CA_CERT: ((boshcli_ca_cert_slcpi.private_key))
+          endpoint: ((stemcell-sl-os-endpoint))
+          bucket: ((candidate-custom-bluemix-stemcell-bucket))
+          filew3_server: ((file_w3_server))
+          security_client_crt: ((security_client_crt.private_key))
+          security_client_key: ((security_client_key.private_key))
+          security_ca_pem: ((security_ca_pem.private_key))
+          crowdstrike_version: ((crowdstrike_version))
+
+  - name: backup-stemcell
+    plan:
+      - aggregate:
+        - get: version
+#          trigger: true
+          passed: [test-stemcell]
+        - get: bosh-linux-stemcell-builder
+        - get: light-bluemix-stemcell
+          passed: [test-stemcell]
+      - task: backup-stemcell-images
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/backup-stemcell-images-bionic.yml
+        params:
+          stemcell_vm_id: ((softlayer-vm-id-bionic))
+          SL_USERNAME: ((softlayer-username))
+          SL_API_KEY: ((softlayer-api-key))
+          sl_para_id: ((sl_para_id))
+          longName: ((longName))
+          sl_para_name: ((sl_para_name))
+
+  - name: promote-stemcell
+    plan:
+      - aggregate:
+        - get: bosh-linux-stemcell-builder
+        - get: light-bluemix-stemcell
+#          trigger: true
+          passed: [backup-stemcell]
+        - get: version
+          passed: [backup-stemcell]
+      - task: promote-stemcell
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/publish-bionic.yml
+        params:
+          PUBLISHED_BUCKET_NAME: bluemix-custom-stemcell
+      - put: bluemix-stemcell
+        params: 
+          file: bluemix-stemcell/*.tgz
+          acl: public-read
+
+resources:
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
+      branch: master
+
+  - name: stemcell-info
+    type: s3
+    source:
+      bucket: ((candidate-custom-bluemix-stemcell-bucket))
+      access_key_id: ((stemcell-sl-os-access-key))
+      secret_access_key: ((stemcell-sl-os-secret-key))
+      endpoint: ((stemcell-sl-os-endpoint))
+      regexp: stemcell-info-(.*).json
+
+  - name: version
+    type: semver
+    source:
+      driver: s3
+      initial_version: ((stemcell_initial_version_bionic))
+      key: ((stemcell_version_key_bionic))
+      bucket: ((candidate-custom-bluemix-stemcell-bucket))
+      access_key_id: ((stemcell-sl-os-access-key))
+      secret_access_key: ((stemcell-sl-os-secret-key))
+      endpoint: ((stemcell-sl-os-endpoint))
+
+  # official light community stemcell
+  - name: light-softlayer-stemcell-prod
+    type: s3
+    source:
+      access_key_id: ((stemcell-aws-access-key))
+      secret_access_key: ((stemcell-aws-secret-key))
+      bucket: bosh-softlayer-cpi-stemcells
+      regexp: light-bosh-stemcell-(.*)-softlayer-xen-ubuntu-bionic-go_agent.tgz
+
+  # candidate light custom stemcell
+  - name: light-bluemix-stemcell
+    type: s3
+    source:
+      bucket: ((candidate-custom-bluemix-stemcell-bucket))
+      regexp: light-bosh-stemcell-(.*)-bluemix-xen-ubuntu-bionic-go_agent.tgz
+      access_key_id: ((stemcell-sl-os-access-key))
+      secret_access_key: ((stemcell-sl-os-secret-key))
+      endpoint: ((stemcell-sl-os-endpoint))
+
+  # official light custom stemcell
+  - name: bluemix-stemcell
+    type: s3
+    source:
+      bucket: bluemix-custom-stemcell
+      regexp: light-bosh-stemcell-(.*)-bluemix-xen-ubuntu-bionic-go_agent.tgz
+      access_key_id: ((stemcell-sl-os-access-key))
+      secret_access_key: ((stemcell-sl-os-secret-key))
+      endpoint: ((stemcell-sl-os-endpoint))
+
+  - name: pipeline-image
+    source:
+      password: ((private-registry-docker-password-read-only))
+      repository: registry.eu-gb.bluemix.net/concourse/ci-bluemix-pipelines
+      tag: latest
+      username: token
+    type: docker-image
+
+  - name: deploy-yml
+    type: git
+    source:
+      uri: git@github.ibm.com:BlueMix-Fabric/bosh-cdl-private
+      branch: master
+      private_key: ((bluemix_private_key.private_key))

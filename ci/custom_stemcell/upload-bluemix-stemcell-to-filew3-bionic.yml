@@ -1,0 +1,32 @@
+---
+jobs:
+  - name: upload-stemcell-filew3-bionic
+    serial: true
+    plan:
+      - aggregate:
+        - get: bosh-linux-stemcell-builder
+        - get: stemcell
+          resource: light-bluemix-stemcell
+          trigger: true
+      - task: upload-filew3
+        file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/upload-filew3.yml
+        params:
+          FILE_W3_STEMCELL_PEM: {{light_bosh_stemcell_filew3_key}}
+
+resources:
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: https://github.com/bluebosh/bosh-linux-stemcell-builder
+      branch: master
+
+  - name: light-bluemix-stemcell
+    type: s3
+    source:
+      bucket: bluemix-custom-stemcell
+      regexp: light-bosh-stemcell-(.*)-bluemix-xen-ubuntu-bionic-go_agent.tgz
+      access_key_id: {{stemcell-sl-os-access-key}}
+      secret_access_key: {{stemcell-sl-os-secret-key}}
+      endpoint: s3.us.cloud-object-storage.appdomain.cloud
+
+
