@@ -5,7 +5,7 @@ describe 'Ubuntu 18.04 stemcell image', stemcell_image: true do
 
   linux_version_regex = 's/linux-(.+)-([0-9]+).([0-9]+).([0-9]+)-([0-9]+)/linux-\1-\2.\3/'
 
-  context 'installed by image_install_grub', {exclude_on_ppc64le: true} do
+  context 'installed by image_install_grub' do
     describe file('/boot/grub/grub.cfg') do
       it { should be_file }
       its(:content) { should match 'set default="0"' }
@@ -17,7 +17,7 @@ describe 'Ubuntu 18.04 stemcell image', stemcell_image: true do
       its(:content) { should match ' earlyprintk=ttyS0 rootdelay=300' }
       its(:content) { should match %r{initrd\t/boot/initrd.img-\S+-generic} }
 
-      it('should set the grub menu password (stig: V-38585)') { expect(subject.content).to match /^password --md5 \*/ }
+      it('should set the grub menu password (stig: V-38585)') { expect(subject.content).to match /password_pbkdf2 vcap/ }
       it('should be of mode 600 (stig: V-38583)') { expect(subject).to be_mode(0600) }
       it('should be owned by root (stig: V-38579)') { expect(subject).to be_owned_by('root') }
       it('should be grouped into root (stig: V-38581)') { expect(subject.group).to eq('root') }
@@ -68,7 +68,7 @@ describe 'Ubuntu 18.04 stemcell image', stemcell_image: true do
 
       it 'should be a proper superset of the installed static libraries' do
         libraries_to_remove = subject.content.split("\n")
-        found_libraries = command("find / -iname '*.a' | sort | uniq").stdout.split("\n")
+        found_libraries = command('find / -iname "*.a" | sort | uniq' ).stdout.split("\n")
 
         expect(libraries_to_remove).to include(*found_libraries)
       end

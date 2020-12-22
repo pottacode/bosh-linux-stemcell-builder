@@ -46,14 +46,9 @@ wget -O /usr/bin/meta4 https://github.com/dpb587/metalink/releases/download/v0.2
   && echo "81a592eaf647358563f296aced845ac60d9061a45b30b852d1c3f3674720fe19  /usr/bin/meta4" | shasum -a 256 -c \
   && chmod +x /usr/bin/meta4
 
-os_type="$(get_os_type)"
 bosh_agent_version=$(cat ${assets_dir}/bosh-agent-version)
-if is_ppc64le; then
-  /usr/bin/meta4 file-download --metalink=${assets_dir}/metalink.meta4 --file=bosh-agent-${bosh_agent_version}-linux-ppc64le bosh-agent
-else
-  curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.268.16-sl-linux-amd64"
-  echo "070bda6a93cafd6667d44a68a2e11e360ba193af  bosh-agent" | shasum -c -
-fi
+curl_it "https://s3.amazonaws.com/ng-bosh-softlayer-agent/bosh-agent-2.333.0-new2-sl-linux-amd64"
+echo "db21b473ae3cf2d396762cd89a5a7381e3df7286  bosh-agent" | shasum -c -
 
 mv bosh-agent $chroot/var/vcap/bosh/bin/
 
