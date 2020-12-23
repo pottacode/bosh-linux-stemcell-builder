@@ -23,9 +23,9 @@ jobs:
     plan:
       - aggregate:
           - get: version
-            passed:
-            - new-stemcell-version
-            trigger: true
+#            passed:
+#            - new-stemcell-version
+#            trigger: true
           - get: bosh-linux-stemcell-builder
           - get: bosh-linux-stemcell-builder-master
       - task: create-stemcell
