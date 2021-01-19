@@ -127,8 +127,8 @@ jobs:
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/backup-stemcell-images.yml
         params:
           stemcell_vm_id: ((softlayer-vm-id-ded))
-          SL_USERNAME: ((softlayer-username))
-          SL_API_KEY: ((softlayer-api-key))
+          SL_USERNAME: ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-gubin))
           sl_para_id: ((sl_para_id))
           longName: ((longName))
           sl_para_name: ((sl_para_name))

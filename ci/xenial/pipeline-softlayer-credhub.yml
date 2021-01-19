@@ -239,8 +239,8 @@ jobs:
           OS_NAME: ubuntu
           OS_VERSION: xenial
           PUBLISHED_BUCKET_NAME: bosh-softlayer-cpi-stemcells
-          SL_API_KEY: ((softlayer-api-key))
-          SL_USERNAME:  ((softlayer-username))
+          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME:  ((softlayer-username-gubin))
           VM_ID:  ((softlayer-vm-id))
 
   - name: publish-stemcells-boshio
