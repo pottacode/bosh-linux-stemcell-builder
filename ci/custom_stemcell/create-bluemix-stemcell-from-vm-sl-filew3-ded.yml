@@ -231,4 +231,4 @@ resources:
     source:
       uri: git@github.ibm.com:BlueMix-Fabric/bosh-cdl-private
       branch: master
-      private_key: ((bluemix_private_key.private_key))
+      private_key: ((github_private_key.private_key))
