@@ -132,7 +132,7 @@ module Bosh::Stemcell
     def alicloud_stages
       %i[
         system_network
-        system_alicloud_modules
+        system_alicloud
         system_parameters
         bosh_clean
         bosh_harden
@@ -211,8 +211,8 @@ module Bosh::Stemcell
         # when adding a stage that changes files in the image, do so before
         # this line.  Image create will make the image so any changes to the
         # filesystem after it won't apply.
-        :image_create_two_partitions,
-        :image_install_grub_two_partitions,
+        :image_create_softlayer_two_partitions,
+        :image_install_grub_softlayer_two_partitions,
       ]
     end
 

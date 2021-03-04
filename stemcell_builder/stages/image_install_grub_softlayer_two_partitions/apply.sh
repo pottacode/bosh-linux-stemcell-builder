@@ -6,7 +6,6 @@ base_dir=$(readlink -nf $(dirname $0)/../..)
 source $base_dir/lib/prelude_apply.bash
 
 disk_image=${work}/${stemcell_image_name}
-image_mount_point=${work}/mnt
 
 ## unmap the loop device in case it's already mapped
 #umount ${image_mount_point}/proc || true
@@ -22,17 +21,23 @@ kpartx -dv ${disk_image}
 device=$(losetup --show --find ${disk_image})
 add_on_exit "losetup --verbose --detach ${device}"
 
-device_partition=$(kpartx -sav ${device} | grep "^add" | cut -d" " -f3)
+# totally two partitions, first is for /boot, second is for /
+device_partition1=$(kpartx -sav ${device} | grep "^add" | cut -d" " -f3 | head -1)
+device_partition2=$(kpartx -sav ${device} | grep "^add" | cut -d" " -f3 | tail -1)
 add_on_exit "kpartx -dv ${device}"
 
-loopback_dev="/dev/mapper/${device_partition}"
+loopback_dev1="/dev/mapper/${device_partition1}"
+loopback_dev2="/dev/mapper/${device_partition2}"
 
 # Mount partition
 image_mount_point=${work}/mnt
 mkdir -p ${image_mount_point}
-
-mount ${loopback_dev} ${image_mount_point}
+mount ${loopback_dev2} ${image_mount_point}
 add_on_exit "umount ${image_mount_point}"
+
+mkdir -p ${image_mount_point}/boot
+mount ${loopback_dev1} ${image_mount_point}/boot
+add_on_exit "umount ${image_mount_point}/boot"
 
 # == Guide to variables in this script (all paths are defined relative to the real root dir, not the chroot)
 
@@ -54,10 +59,15 @@ touch ${image_mount_point}${device}
 mount --bind ${device} ${image_mount_point}${device}
 add_on_exit "umount ${image_mount_point}${device}"
 
-mkdir -p `dirname ${image_mount_point}${loopback_dev}`
-touch ${image_mount_point}${loopback_dev}
-mount --bind ${loopback_dev} ${image_mount_point}${loopback_dev}
-add_on_exit "umount ${image_mount_point}${loopback_dev}"
+mkdir -p `dirname ${image_mount_point}${loopback_dev1}`
+touch ${image_mount_point}${loopback_dev1}
+mount --bind ${loopback_dev1} ${image_mount_point}${loopback_dev1}
+add_on_exit "umount ${image_mount_point}${loopback_dev1}"
+
+mkdir -p `dirname ${image_mount_point}${loopback_dev2}`
+touch ${image_mount_point}${loopback_dev2}
+mount --bind ${loopback_dev2} ${image_mount_point}${loopback_dev2}
+add_on_exit "umount ${image_mount_point}${loopback_dev2}"
 
 # GRUB 2 needs /sys and /proc to do its job
 mount -t proc none ${image_mount_point}/proc
@@ -73,14 +83,8 @@ run_in_chroot ${image_mount_point} "grub-install -v --no-floppy --grub-mkdevicem
 
 # Enable password-less booting in openSUSE, only editing the boot menu needs to be restricted
 run_in_chroot ${image_mount_point} "sed -i 's/CLASS=\\\"--class gnu-linux --class gnu --class os\\\"/CLASS=\\\"--class gnu-linux --class gnu --class os --unrestricted\\\"/' /etc/grub.d/10_linux"
-
-grub_suffix=""
-if [ "${stemcell_infrastructure}" == "aws" ]; then
-  grub_suffix="nvme_core.io_timeout=4294967295"
-fi
-
 cat >${image_mount_point}/etc/default/grub <<EOF
-GRUB_CMDLINE_LINUX="vconsole.keymap=us net.ifnames=0 biosdevname=0 crashkernel=auto selinux=0 plymouth.enable=0 console=ttyS0,115200n8 earlyprintk=ttyS0 rootdelay=300 ipv6.disable=1 audit=1 cgroup_enable=memory swapaccount=1 ${grub_suffix}"
+GRUB_CMDLINE_LINUX="vconsole.keymap=us net.ifnames=0 biosdevname=0 crashkernel=auto selinux=0 plymouth.enable=0 console=ttyS0,115200n8 earlyprintk=ttyS0 rootdelay=300 ipv6.disable=1 audit=1 cgroup_enable=memory swapaccount=1"
 EOF
 
 # we use a random password to prevent user from editing the boot menu
@@ -88,7 +92,7 @@ pbkdf2_password=`run_in_chroot ${image_mount_point} "echo -e '${random_password}
 echo "\
 cat << EOF
 set superusers=vcap
-set root=(hd0,0)
+set root=(hd0,2)
 password_pbkdf2 vcap $pbkdf2_password
 EOF" >> ${image_mount_point}/etc/grub.d/00_header
 
@@ -96,20 +100,22 @@ EOF" >> ${image_mount_point}/etc/grub.d/00_header
 run_in_chroot ${image_mount_point} "GRUB_DISABLE_RECOVERY=true grub-mkconfig -o /boot/grub/grub.cfg"
 
 # set the correct root filesystem; use the ext2 filesystem's UUID
-device_uuid=$(dumpe2fs $loopback_dev | grep UUID | awk '{print $3}')
-sed -i s%root=${loopback_dev}%root=UUID=${device_uuid}%g ${image_mount_point}/boot/grub/grub.cfg
+device_uuid_root=$(dumpe2fs $loopback_dev2 | grep UUID | awk '{print $3}')
+sed -i s%root=${loopback_dev2}%root=UUID=${device_uuid_root}%g ${image_mount_point}/boot/grub/grub.cfg
 
 rm ${image_mount_point}/device.map
 
 # Figure out uuid of partition
-uuid=$(blkid -c /dev/null -sUUID -ovalue ${loopback_dev})
+uuid_boot=$(blkid -c /dev/null -sUUID -ovalue ${loopback_dev1})
+uuid_root=$(blkid -c /dev/null -sUUID -ovalue ${loopback_dev2})
 kernel_version=$(basename $(ls -rt ${image_mount_point}/boot/vmlinuz-* |tail -1) |cut -f2-8 -d'-')
 initrd_file="initrd.img-${kernel_version}"
 os_name=$(source ${image_mount_point}/etc/lsb-release ; echo -n ${DISTRIB_DESCRIPTION})
 
 cat > ${image_mount_point}/etc/fstab <<FSTAB
 # /etc/fstab Created by BOSH Stemcell Builder
-UUID=${uuid} / ext4 defaults 1 1
+UUID=${uuid_boot} /boot ext4 defaults 1 1
+UUID=${uuid_root} / ext4 defaults 1 1
 FSTAB
 
 chown -fLR root:root ${image_mount_point}/boot/grub/grub.cfg
