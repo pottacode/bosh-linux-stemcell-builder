@@ -23,6 +23,8 @@ else
  exit 1
 fi
 
+sleep 30
+
 vm_status=$(bosh2 -e ${ALIAS} -d ${dname} vms | grep "dummy" | awk -F ' ' '{print $2}')
 if [[ "${vm_status}" = "running" ]]; then
     echo "deploy vm success"
