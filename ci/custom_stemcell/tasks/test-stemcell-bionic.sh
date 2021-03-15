@@ -42,5 +42,5 @@ fi
 #     exit 1
 # fi
 
-private_ip=`bosh2 -e ${ALIAS} ssh -c "sudo ifconfig" -d ${dname} | grep -A1 eth0 | grep inet | awk '{print $2}'`
+private_ip=`bosh2 -e ${ALIAS} ssh -c "sudo ifconfig" -d ${dname} | grep -A1 eth0 | grep inet | awk -F 'inet' '{print $2}' | awk '{print $1}'`
 echo "The new vm private ip is " $private_ip
