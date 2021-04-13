@@ -4,6 +4,7 @@ require_relative 'shellout_type_assertions'
 
 RSpec.configure do |config|
   if ENV['STEMCELL_IMAGE']
+    # if `config.filter[exclude_on_softlayer]` is set, it means you're building the SoftLayer stemcell.
     if config.filter[:exclude_on_softlayer]
       disk_image = Bosh::Stemcell::DiskImage.new(image_file_path: ENV['STEMCELL_IMAGE'])
       config.before(:suite) do |example|
