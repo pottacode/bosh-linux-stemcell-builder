@@ -19,7 +19,7 @@
   VBoxManage clonehd *.vmdk --format VHD ${stemcell_vhd_filename}
 
   echo -e "\n Placing object in Softlayer..."
-  pip install awscli
+  pip install awscli==1.19.0
   aws configure set aws_access_key_id ${ACCESS_KEY_ID}
   aws configure set aws_secret_access_key ${SECRET_ACCESS_KEY}
   aws --endpoint-url=https://${ENDPOINT} s3 cp ${stemcell_vhd_filename} s3://${BUCKET}/
