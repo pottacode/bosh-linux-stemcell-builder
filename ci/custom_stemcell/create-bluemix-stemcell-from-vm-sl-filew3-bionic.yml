@@ -49,7 +49,7 @@ jobs:
           passed: [capture-stemcell]        
         - get: version
           passed: [capture-stemcell]
-#          trigger: true
+          trigger: true
       - task: generate-light-stemcell
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/generate-light-stemcell-bionic.yml
         params:
@@ -70,7 +70,7 @@ jobs:
     plan:
       - aggregate:
         - get: version
-#          trigger: true
+          trigger: true
           passed: [generate-light-stemcell]
         - get: bosh-linux-stemcell-builder
         - get: pipeline-image
@@ -100,7 +100,7 @@ jobs:
     plan:
       - aggregate:
         - get: version
-#          trigger: true
+          trigger: true
           passed: [test-stemcell]
         - get: bosh-linux-stemcell-builder
         - get: light-bluemix-stemcell
@@ -120,7 +120,7 @@ jobs:
       - aggregate:
         - get: bosh-linux-stemcell-builder
         - get: light-bluemix-stemcell
-#          trigger: true
+          trigger: true
           passed: [backup-stemcell]
         - get: version
           passed: [backup-stemcell]
