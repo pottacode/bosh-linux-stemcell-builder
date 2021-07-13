@@ -29,8 +29,8 @@ jobs:
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/capture-stemcell-bionic.yml
         params:
           stemcell_vm_id: ((softlayer-vm-id-bionic))
-          SL_USERNAME: ((softlayer-username-gubin))
-          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME: ((softlayer-username-cloudgre))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
           sl_para_id: ((sl_para_id))
           longName: ((longName))
           sl_para_name: ((sl_para_name))
@@ -58,8 +58,8 @@ jobs:
           IAAS: bluemix
           OS_NAME: ubuntu
           OS_VERSION: bionic
-          SL_USERNAME: ((softlayer-username-gubin))
-          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME: ((softlayer-username-cloudgre))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
       - put: light-bluemix-stemcell
         params: 
           file: light-stemcell/*.tgz
@@ -109,8 +109,8 @@ jobs:
         file: bosh-linux-stemcell-builder/ci/custom_stemcell/tasks/backup-stemcell-images-bionic.yml
         params:
           stemcell_vm_id: ((softlayer-vm-id-bionic))
-          SL_USERNAME: ((softlayer-username-gubin))
-          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME: ((softlayer-username-cloudgre))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
           sl_para_id: ((sl_para_id))
           longName: ((longName))
           sl_para_name: ((sl_para_name))

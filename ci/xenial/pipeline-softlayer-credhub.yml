@@ -77,8 +77,8 @@ jobs:
           HYPERVISOR: xen
           OS_NAME: ubuntu
           OS_VERSION: xenial
-          SL_USERNAME: ((softlayer-username-gubin))
-          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME: ((softlayer-username-cloudgre))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
           BUCKET: ((stemcell-transit-bucket))
           REGION: ((stemcell-sl-os-region))
           COS_SERVICE_ID_KEY: ((cos-service-id-key))
@@ -107,8 +107,8 @@ jobs:
           OS_NAME: ubuntu
           OS_VERSION: xenial
           STEMCELL_FORMATS: softlayer-light
-          SL_USERNAME: ((softlayer-username-gubin))
-          SL_API_KEY: ((softlayer-api-key-gubin))
+          SL_USERNAME: ((softlayer-username-cloudgre))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
           DATACENTER: ((sl_para_name))
         input_mapping:
           stemcell: softlayer-xen-ubuntu-xenial
@@ -239,8 +239,8 @@ jobs:
           OS_NAME: ubuntu
           OS_VERSION: xenial
           PUBLISHED_BUCKET_NAME: bosh-softlayer-cpi-stemcells
-          SL_API_KEY: ((softlayer-api-key-gubin))
-          SL_USERNAME:  ((softlayer-username-gubin))
+          SL_API_KEY: ((softlayer-api-key-cloudgre))
+          SL_USERNAME:  ((softlayer-username-cloudgre))
           VM_ID:  ((softlayer-vm-id))
 
   - name: publish-stemcells-boshio
