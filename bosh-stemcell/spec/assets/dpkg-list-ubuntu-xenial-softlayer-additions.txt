@@ -1,6 +1,0 @@
-busybox-initramfs
-initramfs-tools
-initramfs-tools-core
-multipath-tools
-open-iscsi
-sg3-utils-udev
