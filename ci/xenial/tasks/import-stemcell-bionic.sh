@@ -48,7 +48,7 @@ response = image_mgr.import_image_from_uri(name='${private_image_name}',
                                            note='${private_image_note}',
                                            uri='cos://${REGION}/${BUCKET}/${stemcell_vhd_filename}',
                                            os_code='${image_os_code}',
-                                           ibm_api_key=None,
+                                           ibm_api_key='${COS_SERVICE_ID_KEY}',
                                            cloud_init=False,
                                            byol=False)
 with open('resp.txt', 'w') as f:
