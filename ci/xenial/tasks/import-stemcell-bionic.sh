@@ -125,3 +125,4 @@ if [[ "${convert_success}" = false ]]; then
   echo -e "The image conversion to public failed after 600 seconds, please check image ${public_image_id} status"
   exit 1
 fi
+echo 9764552 > "./stemcell-image/stemcell-info.json"
