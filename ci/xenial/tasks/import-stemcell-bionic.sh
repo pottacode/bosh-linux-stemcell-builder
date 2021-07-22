@@ -20,7 +20,7 @@ endpoint_url = https://api.softlayer.com/xmlrpc/v3.1/
 timeout = 0
 EOF
 
-sl_username = ${SL_USERNAME}
+sl_username=${SL_USERNAME}
 
 echo -e "\n[INFO] Get stemcell vhd filename..."
 stemcell_name="bosh-stemcell-${CANDIDATE_BUILD_NUMBER}-${IAAS}-esxi-${OS_NAME}-${OS_VERSION}-go_agent"
