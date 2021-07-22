@@ -56,7 +56,7 @@ with open('resp.txt', 'w') as f:
 EOF
 
 chmod +x import_image_from_cos.py
-#./import_image_from_cos.py
+./import_image_from_cos.py
 
 echo -e "\n[INFO] Wait for the private image id to be ready..."
 # to fix Python 3 encoding problem
@@ -106,7 +106,25 @@ if [[ "${import_success}" = false ]]; then
   exit 1
 fi
 
-public_image_id=9764552
+echo -e "\n[INFO] Create public image from private image..."
+curl -X POST -d "{
+  \"parameters\":
+  [
+    \"${public_image_name}\",
+    \"${public_image_note}\",
+    \"${public_image_note}\",
+    [
+      {
+          \"id\":${sl_para_id},
+          \"longName\":\"${longName}\",
+          \"name\":\"${sl_para_name}\"
+      }
+    ]
+  ]
+}" https://${sl_username}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest_Block_Device_Template_Group/${private_image_id}/createPublicArchiveTransaction > "./stemcell-image/stemcell-info.json"
+
+echo -e "\n[INFO] Wait until the convert transaction completes..."
+public_image_id=$(cat stemcell-image/stemcell-info.json | sed 's/\.0$//;s/\.0$//')
 convert_success=false
 for (( i=1; i<=60; i++ ))
 do
@@ -125,4 +143,4 @@ if [[ "${convert_success}" = false ]]; then
   echo -e "The image conversion to public failed after 600 seconds, please check image ${public_image_id} status"
   exit 1
 fi
-echo 9764552 > "./stemcell-image/stemcell-info.json"
+
