@@ -106,29 +106,11 @@ if [[ "${import_success}" = false ]]; then
   exit 1
 fi
 
-echo -e "\n[INFO] Create public image from private image..."
-curl -X POST -d "{
-  \"parameters\":
-  [
-    \"${public_image_name}\",
-    \"${public_image_note}\",
-    \"${public_image_note}\",
-    [
-      {
-          \"id\":${sl_para_id},
-          \"longName\":\"${longName}\",
-          \"name\":\"${sl_para_name}\"
-      }
-    ]
-  ]
-}" https://${sl_username}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest_Block_Device_Template_Group/${private_image_id}/createPublicArchiveTransaction > "./stemcell-image/stemcell-info.json"
-
-echo -e "\n[INFO] Wait until the convert transaction completes..."
-public_image_id=$(cat stemcell-image/stemcell-info.json | sed 's/\.0$//;s/\.0$//')
+public_image_id=9764552
 convert_success=false
 for (( i=1; i<=60; i++ ))
 do
-  size=$(slcli image detail ${public_image_id} | grep disk_space | awk '{print $NF}')
+  size=$(slcli image detail ${public_image_id} | grep total_size | awk '{print $NF}')
   if [[ ${size} -eq 0 ]]; then
     echo -e "The image conversion transaction is not completed yet, waiting 10 more seconds..."
     sleep 10
