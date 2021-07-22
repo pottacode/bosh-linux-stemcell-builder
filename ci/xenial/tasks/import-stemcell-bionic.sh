@@ -56,7 +56,7 @@ with open('resp.txt', 'w') as f:
 EOF
 
 chmod +x import_image_from_cos.py
-./import_image_from_cos.py
+#./import_image_from_cos.py
 
 echo -e "\n[INFO] Wait for the private image id to be ready..."
 # to fix Python 3 encoding problem
@@ -82,6 +82,9 @@ if [[ ${id_ok} == false ]]; then
   echo -e "The private image id is not ready after 600 seconds, please check vhd file ${stemcell_vhd_filename} in COS"
   exit 1
 fi
+
+sl_username=$(echo ${SL_USERNAME} |sed 's/@/%40/g')
+#to make working CURL below we need the sed
 
 echo -e "\n[INFO] Wait for private image import to complete..."
 import_success=false
