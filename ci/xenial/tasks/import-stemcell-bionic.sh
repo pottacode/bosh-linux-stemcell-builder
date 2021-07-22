@@ -111,7 +111,7 @@ convert_success=false
 for (( i=1; i<=60; i++ ))
 do
   size=$(slcli image detail ${public_image_id} | grep total_size | awk '{print $NF}')
-  if [[ ${size} -eq 0 ]]; then
+  if [[ ${size} == "0" ]]; then
     echo -e "The image conversion transaction is not completed yet, waiting 10 more seconds..."
     sleep 10
   else
