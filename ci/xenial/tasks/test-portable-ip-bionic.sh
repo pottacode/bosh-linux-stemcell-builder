@@ -13,7 +13,7 @@ bosh2 -e ${ALIAS} upload-stemcell ${stemcell_path} --fix
 # deploy new or os reload
 if [[ -e "deploy-yml/yml/$dname.yml" ]]; then
   bosh2 int deploy-yml/yml/${dname}.yml \
-  -v stemcell_version=${stemcell_version} \
+  -v stemcell_version="\"${stemcell_version}\"" \
   -v portable_ip=${PORTABLE_IP} \
   --var-errs \
   > deploy-yml/yml/gen-${dname}.yml

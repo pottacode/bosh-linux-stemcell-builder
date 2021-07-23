@@ -13,7 +13,7 @@ bosh2 -e ${ALIAS} upload-stemcell ${stemcell_path} --fix
 # deploy new
 if [[ -e "deploy-yml/yml/$dname.yml" ]]; then
   bosh2 int deploy-yml/yml/${dname}.yml \
-  -v stemcell_version=${stemcell_version} \
+  -v stemcell_version="\"${stemcell_version}\"" \
   --var-errs \
   > deploy-yml/yml/gen-${dname}.yml
   bosh2 -e ${ALIAS} -d ${dname} deploy deploy-yml/yml/gen-${dname}.yml -n
