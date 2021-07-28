@@ -25,12 +25,15 @@ mkdir -p ${output_dir}
 echo -e "Compose packages.txt and dev_tools_file_list.txt"
 tar zxf stemcell/*.tgz -C stemcell
 
+sl_username=$(echo ${SL_USERNAME} |sed 's/@/%40/g')
+#to make working CURL below we need the sed
+
 # Create package.txt from "dpkg -l"
 apt-get update
 apt-get install -y jq
 apt-get install -y sshpass
-root_pwd=$(echo `curl -s -g -k https://${SL_USERNAME}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/${stemcell_vm_id}/getSoftwareComponents?objectMask=mask[passwords[password]] | jq '.[0].passwords[0].password'` | sed -e 's/"//g')
-private_ip=$(echo `curl -s -g -k https://${SL_USERNAME}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/${stemcell_vm_id}/getObject?objectMask=mask[primaryIpAddress] | jq .primaryBackendIpAddress` | sed -e 's/"//g')
+root_pwd=$(echo `curl -s -g -k https://${sl_username}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/${stemcell_vm_id}/getSoftwareComponents?objectMask=mask[passwords[password]] | jq '.[0].passwords[0].password'` | sed -e 's/"//g')
+private_ip=$(echo `curl -s -g -k https://${sl_username}:${SL_API_KEY}@api.softlayer.com/rest/v3.1/SoftLayer_Virtual_Guest/${stemcell_vm_id}/getObject?objectMask=mask[primaryIpAddress] | jq .primaryBackendIpAddress` | sed -e 's/"//g')
 sshpass -p $root_pwd ssh -o StrictHostKeychecking=no root@${private_ip} "dpkg -l" > ${output_dir}/packages.txt
 
 cp stemcell/dev_tools_file_list.txt ${output_dir}
