@@ -6,7 +6,7 @@ export CANDIDATE_BUILD_NUMBER=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
 echo -e "\n[INFO] Install tools..."
 apt-get update
 apt-get -y install python3-pip
-pip3 install 'SoftLayer>=5.6.0'
+pip3 install 'SoftLayer>=5.6.0,<=5.7.2'
 pip3 install click==7.0
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
