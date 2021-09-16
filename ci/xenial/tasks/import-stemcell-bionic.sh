@@ -5,7 +5,7 @@ export CANDIDATE_BUILD_NUMBER=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
 
 echo -e "\n[INFO] Install tools..."
 apt-get update
-apt install software-properties-common
+apt install -y software-properties-common
 add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 apt install python3.7
