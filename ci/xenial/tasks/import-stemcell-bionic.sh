@@ -8,7 +8,7 @@ apt-get update
 apt install -y software-properties-common
 add-apt-repository ppa:deadsnakes/ppa -y
 apt-get update
-apt install python3.7
+apt install -y python3.7
 rm /usr/bin/python3
 ln -s /usr/bin/python3.7 /usr/bin/python3
 apt-get -y install python3-pip
