@@ -4,9 +4,13 @@ set -e -x
 export CANDIDATE_BUILD_NUMBER=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
 
 echo -e "\n[INFO] Install tools..."
+add-apt-repository ppa:deadsnakes/ppa
 apt-get update
+apt install python3.7
+rm /usr/bin/python3
+ln -s /usr/bin/python3.7 /usr/bin/python3
 apt-get -y install python3-pip
-pip3 install 'SoftLayer>=5.6.0,<=5.7.2'
+pip3 install 'SoftLayer>=5.6.0'
 pip3 install click==7.0
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
