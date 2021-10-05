@@ -6,11 +6,16 @@ export CANDIDATE_BUILD_NUMBER=$( cat version/number | sed 's/\.0$//;s/\.0$//' )
 echo -e "\n[INFO] Install tools..."
 apt-get update
 apt install -y software-properties-common
-add-apt-repository ppa:deadsnakes/ppa -y
-apt-get update
-apt install -y python3.7
-rm /usr/bin/python3
-ln -s /usr/bin/python3.7 /usr/bin/python3
+
+apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget -y
+wget https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
+tar -xf Python-3.7.10.tgz
+currentdir=$(pwd)
+cd Python-3.7.10
+./configure --enable-optimizations
+make install
+cd $currentdir
+
 apt-get -y install python3-pip
 pip3 install 'SoftLayer>=5.6.0'
 pip3 install click==7.0
