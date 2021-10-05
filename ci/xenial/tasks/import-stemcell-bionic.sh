@@ -46,7 +46,7 @@ public_image_name=public-image-for-light-bosh-stemcell-${OS_VERSION}-${CANDIDATE
 public_image_note="Public image for light bosh stemcell ${OS_VERSION} ${CANDIDATE_BUILD_NUMBER}"
 
 cat > import_image_from_cos.py <<EOF
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 import SoftLayer
 
 client = SoftLayer.create_client_from_env(username='${sl_username}',
@@ -67,7 +67,7 @@ with open('resp.txt', 'w') as f:
 EOF
 
 chmod +x import_image_from_cos.py
-./import_image_from_cos.py
+python3 import_image_from_cos.py
 
 echo -e "\n[INFO] Wait for the private image id to be ready..."
 # to fix Python 3 encoding problem
