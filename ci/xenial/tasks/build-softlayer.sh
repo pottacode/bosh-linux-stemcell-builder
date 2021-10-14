@@ -69,7 +69,7 @@ sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
   set -e
 
   cd bosh-linux-stemcell-builder
-  gem install bundler:1.17.3
+  # gem install bundler:1.17.3
   bundle install --local
   bundle exec rake stemcell:build[$IAAS,esxi,$OS_NAME,$OS_VERSION,$CANDIDATE_BUILD_NUMBER]
   rm -f ./tmp/base_os_image.tgz
