@@ -16,8 +16,6 @@ bosh2 -e ${ALIAS} upload-release http://${filew3_server}/releases/security-relea
 if [ -e "deploy-yml/yml/${dname}.yml" ]; then
   bosh2 int deploy-yml/yml/${dname}.yml \
   -v stemcell_version=${stemcell_version} \
-  -v SR_version=${RELEASE} \
-  -v crowdstrike_version=${crowdstrike_version} \
   --var-errs \
   > deploy-yml/yml/gen-${dname}.yml
   bosh2 -e ${ALIAS} -d ${dname} deploy deploy-yml/yml/gen-${dname}.yml --no-redact -n
