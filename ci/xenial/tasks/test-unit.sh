@@ -8,6 +8,9 @@ set +e
 chroot /tmp/ubuntu-chroot /bin/bash -c 'useradd -G nogroup shellout'
 set -e
 
+# below bundle install command cannot executed as root
+su - shellout
+
 pushd bosh-linux-stemcell-builder
   bundle install --local
 
