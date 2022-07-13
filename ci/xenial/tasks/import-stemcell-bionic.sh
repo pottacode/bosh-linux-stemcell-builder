@@ -18,7 +18,6 @@ cd $currentdir
 
 apt-get -y install python3-pip
 pip3 install 'SoftLayer>=5.6.0'
-pip3 install click==7.0
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
