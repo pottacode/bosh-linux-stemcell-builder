@@ -8,10 +8,10 @@ apt-get update
 apt install -y software-properties-common
 
 apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget -y
-wget https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
-tar -xf Python-3.7.10.tgz
+wget https://www.python.org/ftp/python/3.9.13/Python-3.9.13.tgz
+tar -xf Python-3.9.13.tgz
 currentdir=$(pwd)
-cd Python-3.7.10
+cd Python-3.9.13
 ./configure --enable-optimizations
 make install
 cd $currentdir
