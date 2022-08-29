@@ -57,6 +57,13 @@ function install_and_hold_packages() {
 }
 
 
+function write_fips_cmdline_conf() {
+    cat << "EOF" >> "${chroot}/etc/default/grub.d/99-fips.cfg"
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT fips=1"
+EOF
+}
+
+
 # taken from https://git.launchpad.net/livecd-rootfs/tree/live-build/ubuntu-cpc/hooks.d/chroot/999-cpc-fixes.chroot#n125
 psuedo_grub_probe() {
    cat <<"PSUEDO_GRUB_PROBE"
