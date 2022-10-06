@@ -76,7 +76,9 @@ export LANG=C.UTF-8
 id_ok=false
 for (( i=1; i<=60; i++ ))
 do
-  private_image_id=$(slcli image list --name "${private_image_name}" | tail -f | cut -d " " -f 2 | tr -d ' ')
+  pr_image_id=$(slcli image list --name "${private_image_name}" | tail -f | cut -d " " -f 2)
+  echo ${pr_image_id} > id.txt
+  private_image_id="$(cat id.txt)"
   if [[ ! ${private_image_id} ]]; then
     echo -e "The private image id is not ready yet, waiting 10 more seconds..."
     sleep 10
