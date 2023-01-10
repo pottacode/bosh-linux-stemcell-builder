@@ -76,6 +76,7 @@ sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
   rm -f ./tmp/base_os_image.tgz
 SUDO
 
+cd $TASK_DIR
 stemcell_name="bosh-stemcell-$CANDIDATE_BUILD_NUMBER-$IAAS-esxi-$OS_NAME-$OS_VERSION-go_agent"
 
 if [ -e bosh-linux-stemcell-builder/tmp/*-raw.tgz ] ; then
