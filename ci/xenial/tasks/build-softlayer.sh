@@ -65,12 +65,13 @@ chown -R ubuntu:ubuntu bosh-linux-stemcell-builder
 
 sudo chmod u+s $(which sudo)
 
+pwd
+bundle install --local
+
 sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
   set -e
 
   cd bosh-linux-stemcell-builder
-  gem install bundler:2.22.2
-  bundle install --local
   bundle exec rake stemcell:build[$IAAS,esxi,$OS_NAME,$OS_VERSION,$CANDIDATE_BUILD_NUMBER]
   rm -f ./tmp/base_os_image.tgz
 SUDO
