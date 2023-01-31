@@ -24,16 +24,35 @@ RUN apt-get update \
     lsof \
   && apt-get clean
 
+# Nokogiri dependencies
+RUN apt-get install -y libxslt-dev libxml2-dev && apt-get clean
+
 RUN groupadd -o -g ${GROUP_ID} ubuntu                  \
   && useradd -u ${USER_ID} -g ${GROUP_ID} -m ubuntu \
   && echo 'ubuntu ALL=NOPASSWD:ALL' >> /etc/sudoers
 
-# Nokogiri dependencies
-RUN apt-get install -y libxslt-dev libxml2-dev && apt-get clean
+# install ruby
+ENV RUBY_SHA256="570e7773100f625599575f363831166d91d49a1ab97d3ab6495af44774155c40"
+ENV RUBY_VERSION="3.0.2"
 
-ADD install-ruby.sh /tmp/install-ruby.sh
-RUN chmod a+x /tmp/install-ruby.sh
-RUN cd /tmp && ./install-ruby.sh && rm install-ruby.sh
+RUN \
+  wget -O ruby-install-0.8.3.tar.gz https://github.com/postmodern/ruby-install/archive/v0.8.3.tar.gz \
+  && tar -xzvf ruby-install-0.8.3.tar.gz \
+  && cd ruby-install-0.8.3/ \
+  && make install \
+  && cd .. \
+  && rm -r ruby-install* \
+  && ruby-install $RUBY_VERSION --cleanup --sha256 $RUBY_SHA256 -- --disable-install-rdoc
+
+# we install chruby to allow us to run `bundle` as a non-root user
+RUN \
+  wget -O chruby-0.3.9.tar.gz https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz \
+  && tar -xzvf chruby-0.3.9.tar.gz \
+  && cd chruby-0.3.9/ \
+  && make install \
+  && cd .. \
+  && rm -r chruby-0.3.9* \
+  && echo 'source /usr/local/share/chruby/chruby.sh; chruby 3.0.2' > ~ubuntu/.bashrc
 
 COPY --from=golang:1 /usr/local/go /usr/local/go
 ENV GOROOT=/usr/local/go PATH=/usr/local/go/bin:$PATH
